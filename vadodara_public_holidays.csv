@@ -1,0 +1,59 @@
+date,holiday,type,day_of_week,is_holiday
+2024-01-14,Makar Sankranti,Festival,Sunday,1
+2024-01-26,Republic Day,National,Friday,1
+2024-03-08,Maha Shivratri,Festival,Friday,1
+2024-03-25,Holi (Dhuleti),Festival,Monday,1
+2024-03-29,Good Friday,Religious,Friday,1
+2024-04-11,Eid-ul-Fitr,Festival,Thursday,1
+2024-04-14,Ambedkar Jayanti,National,Sunday,1
+2024-04-17,Ram Navami,Festival,Wednesday,1
+2024-04-21,Mahavir Jayanti,Festival,Sunday,1
+2024-06-17,Bakri Eid,Festival,Monday,1
+2024-07-17,Moharram,Religious,Wednesday,1
+2024-08-15,Independence Day,National,Thursday,1
+2024-08-19,Raksha Bandhan,Festival,Monday,1
+2024-08-26,Janmashtami,Festival,Monday,1
+2024-09-07,Ganesh Chaturthi,Festival,Saturday,1
+2024-10-02,Gandhi Jayanti,National,Wednesday,1
+2024-10-12,Dussehra,Festival,Saturday,1
+2024-10-31,Diwali,Festival,Thursday,1
+2024-11-01,New Year (Bestu Varas),Festival,Friday,1
+2024-11-02,Bhai Dooj,Festival,Saturday,1
+2024-12-25,Christmas,Religious,Wednesday,1
+2025-01-14,Makar Sankranti,Festival,Tuesday,1
+2025-01-26,Republic Day,National,Sunday,1
+2025-02-26,Maha Shivratri,Festival,Wednesday,1
+2025-03-14,Holi (Dhuleti),Festival,Friday,1
+2025-03-31,Eid-ul-Fitr,Festival,Monday,1
+2025-04-06,Ram Navami,Festival,Sunday,1
+2025-04-10,Mahavir Jayanti,Festival,Thursday,1
+2025-04-14,Ambedkar Jayanti,National,Monday,1
+2025-04-18,Good Friday,Religious,Friday,1
+2025-06-07,Bakri Eid,Festival,Saturday,1
+2025-07-06,Moharram,Religious,Sunday,1
+2025-08-15,Independence Day,National,Friday,1
+2025-08-16,Janmashtami,Festival,Saturday,1
+2025-08-27,Ganesh Chaturthi,Festival,Wednesday,1
+2025-10-02,Gandhi Jayanti,National,Thursday,1
+2025-10-02,Dussehra,Festival,Thursday,1
+2025-10-20,Diwali,Festival,Monday,1
+2025-10-21,New Year (Bestu Varas),Festival,Tuesday,1
+2025-12-25,Christmas,Religious,Thursday,1
+2026-01-14,Makar Sankranti,Festival,Wednesday,1
+2026-01-26,Republic Day,National,Monday,1
+2026-02-15,Maha Shivratri,Festival,Sunday,1
+2026-03-03,Holi (Dhuleti),Festival,Tuesday,1
+2026-03-20,Eid-ul-Fitr,Festival,Friday,1
+2026-03-26,Ram Navami,Festival,Thursday,1
+2026-03-31,Mahavir Jayanti,Festival,Tuesday,1
+2026-04-03,Good Friday,Religious,Friday,1
+2026-04-14,Ambedkar Jayanti,National,Tuesday,1
+2026-05-27,Bakri Eid,Festival,Wednesday,1
+2026-08-15,Independence Day,National,Saturday,1
+2026-08-28,Raksha Bandhan,Festival,Friday,1
+2026-09-04,Janmashtami,Festival,Friday,1
+2026-09-14,Ganesh Chaturthi,Festival,Monday,1
+2026-10-02,Gandhi Jayanti,National,Friday,1
+2026-10-20,Dussehra,Festival,Tuesday,1
+2026-11-08,Diwali,Festival,Sunday,1
+2026-12-25,Christmas,Religious,Friday,1
