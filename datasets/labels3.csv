@@ -1,0 +1,4 @@
+filename,label,class_name,description
+bin_empty_001.png,0,Empty_Bin,"Clean green municipal bin, no overflow"
+bin_overflow_001.png,1,Overflow,"Overflowing green municipal bin, trash on ground"
+pile_roadside_001.png,1,Overflow,"Garbage pile on roadside, no bin"

@@ -1,0 +1,4 @@
+filename,label,class_name,description
+road_good_001.png,0,Good_Road,"Smooth asphalt road, well maintained"
+road_pothole_001.png,1,Bad_Road,"Large dangerous pothole in middle of road"
+road_damaged_001.png,1,Bad_Road,"Damaged road surface with cracks and unevenness"

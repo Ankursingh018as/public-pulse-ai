@@ -1,0 +1,187 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.turbo/
+.vercel/
+.output/
+storybook-static/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# IDE & Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+htmlcov/
+test-results/
+playwright-report/
+test-reports/
+junit.xml
+*.test.js.snap
+__snapshots__/
+
+# Test files (uncomment if you don't want tests in repo)
+# *.test.ts
+# *.test.tsx
+# *.test.js
+# *.test.jsx
+# *.spec.ts
+# *.spec.tsx
+# *.spec.js
+# *.spec.jsx
+# __tests__/
+# tests/
+# e2e/
+# cypress/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.so
+.eggs/
+*.egg-info/
+*.egg
+.pytest_cache/
+venv/
+.venv/
+env/
+ENV/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ML Models (large files)
+models/*.pt
+models/*.pth
+models/*.onnx
+models/*.pkl
+models/*.h5
+models/*.joblib
+models/*.bin
+*.safetensors
+!models/.gitkeep
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.cache
+
+# Secrets & credentials
+*.pem
+*.key
+*.crt
+secrets/
+credentials/
+.secrets
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.sql.gz
+dumps/
+
+# Redis
+dump.rdb
+
+# Next.js specific
+.next/
+.swc/
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Misc
+*.map
+.eslintcache
+.stylelintcache
+.prettiercache
+.cache/
+public/sw.js
+public/workbox-*.js
+
+# Large datasets (optional - uncomment if needed)
+# datasets/*.csv
+# datasets/*.json
+
+# Uploaded files
+uploads/
+public/uploads/
+
+# Generated files
+generated/
+.generated/
+
+# Debug & utility scripts
+check_*.py
+debug_*.py
+test_*.py
+run_*.py
+start_locally.bat
+*.bat
+!scripts/*.bat
+
+# Scratch/temp files
+scratch/
+scratch.*
+temp_*
+_temp*
+*.draft
+*.bak

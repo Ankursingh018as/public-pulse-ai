@@ -1,0 +1,4 @@
+filename,label,class_name,description
+street_normal_001.png,0,Normal,"Wet street, no waterlogging, traffic moving"
+street_waterlogged_001.png,1,Flooded,"Knee-deep water, rickshaw stuck, shops affected"
+street_submerged_001.png,1,Flooded,"Severe flooding, cars submerged, residential area"

@@ -1,0 +1,14 @@
+{
+    "name": "shared-schemas",
+    "version": "1.0.0",
+    "description": "Shared TypeScript schemas for Public Pulse",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc -w"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.0"
+    }
+}

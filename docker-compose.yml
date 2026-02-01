@@ -1,0 +1,220 @@
+version: '3.8'
+
+services:
+  # ===========================================
+  # DATABASES
+  # ===========================================
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: pulse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-pulse}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-pulsedev123}
+      POSTGRES_DB: ${POSTGRES_DB:-pulse_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pulse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: pulse-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: pulse-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: pulse_raw
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # API GATEWAY
+  # ===========================================
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: pulse-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+      - MONGO_URI=mongodb://mongodb:27017/pulse_raw
+      - AI_ENGINE_URL=http://ai-engine:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - ./services/api-gateway:/app
+      - /app/node_modules
+
+  # ===========================================
+  # AI ENGINE (Python FastAPI)
+  # ===========================================
+  ai-engine:
+    build:
+      context: ./services/ai-engine
+      dockerfile: Dockerfile
+    container_name: pulse-ai
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_HOST=postgres
+      - REDIS_HOST=redis
+      - MONGO_URI=mongodb://mongodb:27017/pulse_raw
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/ai-engine:/app
+      - ./models:/app/models
+
+  # ===========================================
+  # DATA ACQUISITION SERVICES
+  # ===========================================
+  wa-service:
+    build:
+      context: ./services/wa-service
+      dockerfile: Dockerfile
+    container_name: pulse-wa
+    restart: unless-stopped
+    ports:
+      - "3010:3010"
+    environment:
+      - REDIS_HOST=redis
+      - MONGO_URI=mongodb://mongodb:27017/pulse_raw
+    depends_on:
+      - redis
+      - mongodb
+    volumes:
+      - ./services/wa-service:/app
+      - /app/node_modules
+
+  news-service:
+    build:
+      context: ./services/news-service
+      dockerfile: Dockerfile
+    container_name: pulse-news
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - MONGO_URI=mongodb://mongodb:27017/pulse_raw
+    depends_on:
+      - redis
+      - mongodb
+    volumes:
+      - ./services/news-service:/app
+      - /app/node_modules
+
+  traffic-service:
+    build:
+      context: ./services/traffic-service
+      dockerfile: Dockerfile
+    container_name: pulse-traffic
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - ./services/traffic-service:/app
+      - /app/node_modules
+
+  weather-service:
+    build:
+      context: ./services/weather-service
+      dockerfile: Dockerfile
+    container_name: pulse-weather
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - POSTGRES_HOST=postgres
+    depends_on:
+      - redis
+      - postgres
+    volumes:
+      - ./services/weather-service:/app
+      - /app/node_modules
+
+  # ===========================================
+  # FRONTEND (Development)
+  # ===========================================
+  citizen-app:
+    build:
+      context: ./frontend/citizen-app
+      dockerfile: Dockerfile.dev
+    container_name: pulse-citizen
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
+      - NEXT_PUBLIC_WS_URL=ws://localhost:3000
+    volumes:
+      - ./frontend/citizen-app:/app
+      - /app/node_modules
+      - /app/.next
+
+  admin-dashboard:
+    build:
+      context: ./frontend/admin-dashboard
+      dockerfile: Dockerfile.dev
+    container_name: pulse-admin
+    restart: unless-stopped
+    ports:
+      - "3002:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
+      - NEXT_PUBLIC_WS_URL=ws://localhost:3000
+    volumes:
+      - ./frontend/admin-dashboard:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongo_data:
+
+networks:
+  default:
+    name: pulse-network

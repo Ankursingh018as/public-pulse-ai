@@ -1,0 +1,11 @@
+date,incident_type,location,source,severity,description
+2024-01-22,Fire,GIDC Makarpura,Fire Dept Log #4021,High,Chemical factory fire in GIDC phase 2. 4 fire tenders deployed.
+2024-05-07,Public Disorder,Tarsali,Police Report,Medium,Minor scuffle outside polling booth during Lok Sabha voting.
+2024-07-24,Flood,Vishwamitri River Banks,VMC Flood Control Room,Critical,River crossed danger mark (26 ft). Low lying areas inundated.
+2024-07-25,Flood,Sama-Savli Road,Times of India,High,Water logging in societies due to heavy overnight rain.
+2024-08-30,Road Collapse,Old Padra Road,Divya Bhaskar,High,Large cave-in observed near Akshar Chowk due to drainage leak.
+2024-11-01,Air Pollution,City Wide,GPCB Report,Severe,AQI crossed 300 post Diwali celebrations.
+2025-04-15,Water Contamination,Panigate,VMC Health Dept,High,Cholera cases reported due to sewage mixing in water line.
+2025-06-10,Tree Fall,Alkapuri,Fire Dept Log #5502,Medium,Old tree fell on parked cars during pre-monsoon storm.
+2025-08-05,Flood,Harni,VMC Flood Control Room,High,Flash flood in Motnath Mahadev area.
+2026-01-08,Traffic Gridlock,Amit Nagar Circle,Traffic Police Twitter,Medium,Truck breakdown caused 3km jam for 4 hours.

@@ -1,0 +1,33 @@
+{
+  "name": "pulse-ai",
+  "version": "1.0.0",
+  "description": "Multimodal AI engine for predicting civic issues",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "frontend/*",
+    "shared/*"
+  ],
+  "scripts": {
+    "dev": "docker-compose up -d && npm run dev:services",
+    "dev:services": "concurrently -n gateway,ai \"npm run dev -w api-gateway\" \"npm run dev -w ai-engine\"",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:unit": "npm run test:unit --workspaces --if-present",
+    "test:integration": "npm run test:integration --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "db:migrate": "npm run migrate -w api-gateway",
+    "db:seed": "npm run seed -w api-gateway",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
