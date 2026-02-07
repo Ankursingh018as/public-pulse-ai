@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+
 export interface Incident {
     id: string;
     event_type: string;
@@ -38,7 +40,7 @@ export function useIncidents() {
     // Fetch Predictions from API
     const fetchPredictions = useCallback(async () => {
         try {
-            const res = await fetch('http://localhost:3000/api/v1/predictions');
+            const res = await fetch(`${API_URL}/predictions`);
             const data = await res.json();
             if (data.data) {
                 setPredictions(data.data);
@@ -47,6 +49,32 @@ export function useIncidents() {
             console.error("Failed to fetch predictions", e);
         } finally {
             setIsLoading(false);
+        }
+    }, []);
+
+    // Fetch incidents from API
+    const fetchIncidentsFromAPI = useCallback(async () => {
+        try {
+            const res = await fetch(`${API_URL}/incidents?limit=50`);
+            const data = await res.json();
+            if (data.data) {
+                const mapped = data.data.map((inc: any) => ({
+                    id: inc._id || inc.id,
+                    event_type: inc.event_type,
+                    lat: inc.lat,
+                    lng: inc.lng,
+                    severity: inc.severity / 10,
+                    radius: inc.radius || 100,
+                    verified: inc.verified_count || 0,
+                    resolved: inc.resolved,
+                    createdAt: new Date(inc.createdAt).getTime(),
+                    description: inc.description,
+                    source: 'api' as const
+                }));
+                setIncidents(mapped);
+            }
+        } catch (e) {
+            console.error("Failed to fetch incidents", e);
         }
     }, []);
 
@@ -66,72 +94,20 @@ export function useIncidents() {
 
     // Initialization Effect
     useEffect(() => {
+        // Fetch real data from API
         fetchPredictions();
+        fetchIncidentsFromAPI();
 
-        // Initial Mock Incidents
-        const generateMockIncident = () => {
-            const types = ['traffic', 'garbage', 'water', 'streetlamp'];
-            const type = types[Math.floor(Math.random() * types.length)];
-            const severity = Number((Math.random() * 0.6 + 0.2).toFixed(2));
-            const lat = VADODARA_CENTER[0] + (Math.random() - 0.5) * 0.05;
-            const lng = VADODARA_CENTER[1] + (Math.random() - 0.5) * 0.05;
-
-            return {
-                id: `sim-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                event_type: type,
-                lat,
-                lng,
-                severity,
-                radius: 100 + severity * 300,
-                verified: 0,
-                resolved: false,
-                createdAt: Date.now(),
-                source: 'simulation' as const
-            };
-        };
-
-        // Seed initial data
-        setIncidents(Array(5).fill(null).map(generateMockIncident));
-
-        // Poll API for predictions
+        // Poll API for updates every 30 seconds
         const predInterval = setInterval(fetchPredictions, 30000);
-        intervalsRef.current.push(predInterval);
-
-        // Simulation Loop - Add new incident occasionally
-        const simInterval = setInterval(() => {
-            if (Math.random() > 0.7) { // 30% chance every 10s
-                addIncident(generateMockIncident());
-            }
-        }, 10000);
-        intervalsRef.current.push(simInterval);
-
-        // Evolution Loop - Update severities (optimized frequency 5s instead of every frame)
-        const evolutionInterval = setInterval(() => {
-            setIncidents(prev => prev.map(inc => {
-                let { severity, radius, verified, resolved } = inc;
-
-                // Decay logic
-                if (resolved) {
-                    severity -= 0.1;
-                } else if (verified > 0) {
-                    severity = Math.min(1, severity + 0.01); // Slow rise
-                    radius += 2;
-                } else {
-                    severity -= 0.005; // Very slow decay for unverified
-                }
-
-                if (severity <= 0.05) return null; // Filter out
-
-                return { ...inc, severity, radius };
-            }).filter(Boolean) as Incident[]);
-        }, 5000);
-        intervalsRef.current.push(evolutionInterval);
+        const incInterval = setInterval(fetchIncidentsFromAPI, 30000);
+        intervalsRef.current.push(predInterval, incInterval);
 
         return () => {
             intervalsRef.current.forEach(clearInterval);
             intervalsRef.current = [];
         };
-    }, [fetchPredictions, addIncident]);
+    }, [fetchPredictions, fetchIncidentsFromAPI]);
 
     return {
         incidents,

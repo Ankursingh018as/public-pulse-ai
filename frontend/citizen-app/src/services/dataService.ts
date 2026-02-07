@@ -6,7 +6,7 @@
 // - Tracks all citizen submissions for admin history view
 // - Syncs verifications and citizen feedback
 
-const API_BASE = (typeof window !== 'undefined' && (window as any).__PP_API_URL__) || 'http://localhost:3000/api/v1';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
 type IncidentPayload = {
   event_type: string;
@@ -209,10 +209,13 @@ export async function getIncidents(): Promise<any[]> {
   try {
     const res = await fetch(`${API_BASE}/incidents`);
     if (!res.ok) throw new Error(`server ${res.status}`);
-    const data = await res.json();
+    const json = await res.json();
+    const serverIncidents = json.data || json || [];
     // Mirror into local history for offline viewing
     const hist = readHistory();
-    const merged = [...(data || []), ...hist].slice(0, 1000);
+    const serverIds = new Set(serverIncidents.map((i: any) => i.id));
+    const uniqueLocal = hist.filter((h: any) => !serverIds.has(h.id) && !serverIds.has(h._serverId));
+    const merged = [...serverIncidents, ...uniqueLocal].slice(0, 1000);
     writeHistory(merged);
     return merged;
   } catch (e) {

@@ -1,5 +1,3 @@
-'use client';
-
 // Admin Dashboard Data Service
 // Centralized data fetching with history support
 

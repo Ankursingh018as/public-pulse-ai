@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { Brain, AlertTriangle, RefreshCw, Sparkles, X } from 'lucide-react';
 import { generateNarration, Incident, NarrationResult } from '../services/groqService';
+import { fetchWeather } from '../services/weatherService';
 
 interface AINarrationPanelProps {
   incidents: Incident[];
@@ -36,12 +37,15 @@ export default function AINarrationPanel({ incidents, isMinimized = false, onTog
 
     setIsLoading(true);
     try {
+      // Fetch real weather data
+      const weather = await fetchWeather();
+      
       const text = await generateNarration(topIncident, {
         nearbyIncidents: incidents.filter(i => 
           Math.abs(i.lat - topIncident.lat) < 0.01 && 
           Math.abs(i.lng - topIncident.lng) < 0.01
         ).length,
-        weatherRisk: 62 // Could be fetched from weather API
+        weatherRisk: Math.round(weather.rainProbability)
       });
 
       const newNarration: NarrationResult = {

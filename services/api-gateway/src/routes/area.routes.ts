@@ -1,43 +1,93 @@
 import { Router } from 'express';
-import { pgPool } from '../server';
+import { Area, Incident } from '../models';
 
 export const areaRouter = Router();
 
-// GET /api/v1/area/:id - Get area stats
-areaRouter.get('/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        // Fetch aggregation from materialized view
-        const stats = await pgPool.query(`
-            SELECT * FROM hourly_issue_stats 
-            WHERE area_id = $1 
-            ORDER BY bucket DESC 
-            LIMIT 24
-        `, [id]);
-
-        const info = await pgPool.query('SELECT * FROM areas WHERE id = $1', [id]);
-
-        if (info.rows.length === 0) {
-            return res.status(404).json({ error: 'Area not found' });
-        }
-
-        res.json({
-            area: info.rows[0],
-            stats: stats.rows
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
-
-// GET /api/v1/area - List all areas
+// GET /api/v1/areas - List all areas
 areaRouter.get('/', async (req, res) => {
     try {
-        const result = await pgPool.query('SELECT id, name, city, center FROM areas');
-        res.json({ data: result.rows });
+        const areas = await Area.find().sort({ name: 1 }).lean();
+
+        res.json({
+            success: true,
+            count: areas.length,
+            data: areas
+        });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error fetching areas:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch areas' });
     }
 });
+
+// GET /api/v1/areas/:id - Get area details
+areaRouter.get('/:id', async (req, res) => {
+    try {
+        const area = await Area.findById(req.params.id);
+        
+        if (!area) {
+            return res.status(404).json({ success: false, error: 'Area not found' });
+        }
+
+        const activeIncidents = await Incident.countDocuments({
+            area_name: area.name,
+            resolved: false
+        });
+
+        res.json({
+            success: true,
+            data: {
+                ...area.toObject(),
+                active_incidents: activeIncidents
+            }
+        });
+    } catch (err) {
+        console.error('Error fetching area:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch area' });
+    }
+});
+
+// POST /api/v1/areas - Create new area
+areaRouter.post('/', async (req, res) => {
+    try {
+        const { name, zone, lat, lng, population } = req.body;
+
+        const area = new Area({
+            name,
+            zone,
+            lat,
+            lng,
+            population,
+            risk_score: 0,
+            active_incidents: 0
+        });
+
+        await area.save();
+
+        res.status(201).json({ success: true, data: area });
+    } catch (err) {
+        console.error('Error creating area:', err);
+        res.status(500).json({ success: false, error: 'Failed to create area' });
+    }
+});
+
+// PATCH /api/v1/areas/:id - Update area
+areaRouter.patch('/:id', async (req, res) => {
+    try {
+        const updates = req.body;
+        const area = await Area.findByIdAndUpdate(
+            req.params.id,
+            { $set: updates },
+            { new: true, runValidators: true }
+        );
+
+        if (!area) {
+            return res.status(404).json({ success: false, error: 'Area not found' });
+        }
+
+        res.json({ success: true, data: area });
+    } catch (err) {
+        console.error('Error updating area:', err);
+        res.status(500).json({ success: false, error: 'Failed to update area' });
+    }
+});
+

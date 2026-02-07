@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Camera, Check, X, AlertTriangle, HelpCircle } from 'lucide-react';
 
 interface VerificationModalProps {
@@ -11,14 +11,25 @@ interface VerificationModalProps {
 
 export default function VerificationModal({ prediction, onClose, onSubmit }: VerificationModalProps) {
     const [submitting, setSubmitting] = useState(false);
+    const [photoAdded, setPhotoAdded] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleVote = (response: string) => {
         setSubmitting(true);
-        // Simulate API delay or submit immediately
         setTimeout(() => {
-            onSubmit(response, false);
+            onSubmit(response, photoAdded);
             setSubmitting(false);
-        }, 500);
+        }, 300);
+    };
+
+    const handlePhotoClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setPhotoAdded(true);
+        }
     };
 
     if (!prediction) return null;
@@ -82,12 +93,24 @@ export default function VerificationModal({ prediction, onClose, onSubmit }: Ver
                         <HelpCircle className="w-4 h-4" /> Not Sure
                     </button>
                     <button
-                        onClick={() => alert("Camera feature would open here")}
+                        onClick={handlePhotoClick}
                         disabled={submitting}
-                        className="flex items-center justify-center gap-2 p-3 bg-cyan-500/10 text-cyan-400 rounded-xl font-bold hover:bg-cyan-500/20 transition-colors border border-cyan-500/20"
+                        className={`flex items-center justify-center gap-2 p-3 rounded-xl font-bold transition-colors border ${
+                            photoAdded 
+                                ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/20'
+                                : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20'
+                        }`}
                     >
-                        <Camera className="w-4 h-4" /> Add Photo
+                        <Camera className="w-4 h-4" /> {photoAdded ? 'Photo Added ✓' : 'Add Photo'}
                     </button>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        className="hidden"
+                        onChange={handleFileChange}
+                    />
                 </div>
             </div>
         </div>

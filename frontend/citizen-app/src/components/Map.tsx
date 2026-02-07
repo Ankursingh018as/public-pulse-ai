@@ -4,8 +4,20 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import dataService from '../services/dataService';
-import { generatePredictions, Prediction } from '../services/predictionService';
 import ReportIssueModal from './ReportIssueModal';
+import { useUser } from '../context/UserContext';
+
+interface Prediction {
+  id: string;
+  type: string;
+  lat: number;
+  lng: number;
+  probability: number;
+  timeframe: string;
+  severity: string;
+  area_name: string;
+  confidence: number;
+}
 
 interface MapProps {
   selectedFilter: string | null;
@@ -29,14 +41,6 @@ const TYPE_COLORS: Record<string, string> = {
   default: '#6b7280'   // gray
 };
 
-// Generate random position within Vadodara
-function randomVadodaraPosition() {
-  return {
-    lat: VADODARA_BOUNDS.minLat + Math.random() * (VADODARA_BOUNDS.maxLat - VADODARA_BOUNDS.minLat),
-    lng: VADODARA_BOUNDS.minLng + Math.random() * (VADODARA_BOUNDS.maxLng - VADODARA_BOUNDS.minLng)
-  };
-}
-
 // Map click handler for reporting
 function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
   useMapEvents({
@@ -59,6 +63,7 @@ function LocationMarker({ position }: { position: [number, number] | null }) {
 }
 
 export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange }: MapProps) {
+  const { user } = useUser();
   const [incidents, setIncidents] = useState<any[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [aiPredictions, setAIPredictions] = useState<any[]>([]);
@@ -104,8 +109,8 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange }
         if (mountedRef.current && Array.isArray(serverPredictions)) {
           setPredictions(serverPredictions);
         }
-      } catch (e) {
-        console.warn('Initial data load failed, using simulation', e);
+      } catch {
+        // Silent fail - use simulation fallback
       }
     };
 
@@ -170,102 +175,43 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange }
     return () => clearInterval(interval);
   }, []);
 
-  // Generate AI predictions (every 2 min)
+  // Fetch AI predictions from API (every 2 min)
   useEffect(() => {
-    const generateAIPreds = async () => {
-      if (!mountedRef.current || incidents.length === 0) return;
-      try {
-        const preds = await generatePredictions(
-          incidents.map(i => ({ type: i.type, lat: i.lat, lng: i.lng, severity: i.severity })),
-          { rainProbability: 0.3 + Math.random() * 0.4, humidity: 60 + Math.random() * 30 }
-        );
-        if (mountedRef.current) {
-          setAIPredictions(preds.slice(0, 10));
-        }
-      } catch (e) {
-        console.warn('AI prediction generation failed', e);
-      }
-    };
-
-    generateAIPreds();
-    const interval = setInterval(generateAIPreds, 120000);
-    return () => clearInterval(interval);
-  }, [incidents.length]);
-
-  // Simulated incident generation (for demo - every 45-90s)
-  useEffect(() => {
-    if (!mountedRef.current) return;
-
-    const types = ['traffic', 'garbage', 'water', 'light'];
-    
-    const generateRandomIncident = () => {
-      const pos = randomVadodaraPosition();
-      const type = types[Math.floor(Math.random() * types.length)];
-      return {
-        id: `sim-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type,
-        event_type: type,
-        ...pos,
-        severity: 0.3 + Math.random() * 0.5,
-        radius: 80 + Math.random() * 150,
-        verified: 0,
-        resolved: false,
-        source: 'ai-simulation',
-        createdAt: Date.now()
-      };
-    };
-
-    // Add initial simulated incidents if none loaded
-    setTimeout(() => {
-      setIncidents(prev => {
-        if (prev.length < 5) {
-          const simulated = Array.from({ length: 8 }, generateRandomIncident);
-          return [...simulated, ...prev].slice(0, 40);
-        }
-        return prev;
-      });
-    }, 2000);
-
-    // Generate new incidents periodically
-    const genInterval = setInterval(() => {
-      if (mountedRef.current) {
-        const newIncident = generateRandomIncident();
-        setIncidents(prev => [newIncident, ...prev].slice(0, 40));
-      }
-    }, 45000 + Math.floor(Math.random() * 45000));
-
-    return () => clearInterval(genInterval);
-  }, []);
-
-  // Incident evolution loop (severity changes, every 10s)
-  useEffect(() => {
-    const evolveInterval = setInterval(() => {
+    const fetchAIPreds = async () => {
       if (!mountedRef.current) return;
-
-      setIncidents(prev => {
-        const evolved = prev.map(inc => {
-          if (inc.resolved) {
-            // Fade out resolved incidents
-            const newSeverity = Math.max(0, inc.severity - 0.05);
-            return newSeverity <= 0.05 ? { ...inc, toRemove: true } : { ...inc, severity: newSeverity };
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+        const res = await fetch(`${API_URL}/predictions`);
+        if (res.ok) {
+          const data = await res.json();
+          if (mountedRef.current && data.data) {
+            // Map API predictions to local format
+            const mapped = data.data.slice(0, 10).map((p: any) => ({
+              id: p._id || p.id,
+              type: p.event_type,
+              lat: p.lat || p.location?.lat,
+              lng: p.lng || p.location?.lng,
+              probability: p.probability || p.confidence || 0.5,
+              timeframe: p.timeframe || '2h',
+              severity: p.severity || 'medium',
+              area_name: p.area_name || 'Unknown',
+              reasons: p.reasons || [],
+              trend: p.trend || 'stable',
+              confidence: p.confidence || 0.5,
+              createdAt: new Date(p.createdAt).getTime(),
+              expiresAt: new Date(p.valid_until || Date.now() + 7200000).getTime()
+            }));
+            setAIPredictions(mapped);
           }
+        }
+      } catch {
+        // Silent fail - offline mode or API down
+      }
+    };
 
-          // Unverified incidents slowly fade
-          if (inc.verified === 0) {
-            return { ...inc, severity: Math.max(0.1, inc.severity - 0.01) };
-          }
-
-          // Verified incidents can intensify
-          const intensify = Math.min(1, inc.severity + 0.015 * Math.min(inc.verified, 5));
-          return { ...inc, severity: intensify };
-        });
-
-        // Remove faded incidents
-        return evolved.filter(i => !i.toRemove);
-      });
-    }, 10000);
-
-    return () => clearInterval(evolveInterval);
+    fetchAIPreds();
+    const interval = setInterval(fetchAIPreds, 120000);
+    return () => clearInterval(interval);
   }, []);
 
   // Sync to parent when incidents change
@@ -303,7 +249,7 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange }
     await dataService.submitIncident({
       ...payload,
       source: 'citizen-map-click',
-      userId: 'citizen_demo_user_1'
+      userId: user?.id || 'anonymous'
     });
   };
 

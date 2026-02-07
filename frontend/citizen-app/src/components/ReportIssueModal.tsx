@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X, Loader2, CheckCircle, MapPin } from "lucide-react";
-import dataService from "../services/dataService";
+import { useUser } from "../context/UserContext";
 
 interface Props {
   open: boolean;
@@ -12,6 +12,7 @@ interface Props {
 }
 
 export default function ReportIssueModal({ open, onClose, onSubmit, position }: Props) {
+  const { user } = useUser();
   const [type, setType] = useState("traffic");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -30,10 +31,7 @@ export default function ReportIssueModal({ open, onClose, onSubmit, position }: 
         description
       };
 
-      // Primary: enqueue to local pending queue and attempt server sync
-      await dataService.submitIncident({ ...payload, source: 'report-modal', userId: 'citizen_ui' });
-
-      // Secondary: call parent handler if provided (keeps existing behavior)
+      // Submit via parent handler
       if (onSubmit) await onSubmit(payload);
       setSubmitted(true);
       setTimeout(() => {

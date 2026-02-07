@@ -5,3 +5,4 @@ export const verificationRouter = Router();
 const controller = new VerificationController();
 
 verificationRouter.post('/', (req, res) => controller.verify(req, res));
+

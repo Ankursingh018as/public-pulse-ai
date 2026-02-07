@@ -39,28 +39,66 @@ export default function MapSimulation() {
         }
     };
 
+    const fetchIncidents = async () => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+            const res = await fetch(`${API_URL}/incidents?limit=100`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.data) {
+                    setIncidents(data.data);
+                    setLastUpdate(new Date());
+                }
+            }
+        } catch (e) {
+            console.error("Failed to load incidents", e);
+        }
+    };
+
     useEffect(() => {
         fetchPredictions();
-        const interval = setInterval(fetchPredictions, 5000);
-        return () => clearInterval(interval);
+        fetchIncidents();
+        const predInterval = setInterval(fetchPredictions, 5000);
+        const incInterval = setInterval(fetchIncidents, 15000);
+        return () => { clearInterval(predInterval); clearInterval(incInterval); };
     }, []);
 
     // Handle incident approval
-    const handleApprove = useCallback((incidentId: string) => {
-        setIncidents(prev => prev.map(inc => 
-            inc.id === incidentId 
-                ? { ...inc, status: 'approved' as const, approvedAt: Date.now(), approvedBy: 'Admin' }
-                : inc
-        ));
+    const handleApprove = useCallback(async (incidentId: string) => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+            await fetch(`${API_URL}/incidents/${incidentId}/approve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'approve', adminId: 'admin' })
+            });
+            setIncidents(prev => prev.map(inc => 
+                inc.id === incidentId 
+                    ? { ...inc, status: 'approved' as const, approvedAt: Date.now(), approvedBy: 'Admin' }
+                    : inc
+            ));
+        } catch (e) {
+            console.error('Failed to approve incident:', e);
+        }
     }, []);
 
     // Handle incident rejection
-    const handleReject = useCallback((incidentId: string) => {
-        setIncidents(prev => prev.map(inc => 
-            inc.id === incidentId 
-                ? { ...inc, status: 'rejected' as const }
-                : inc
-        ));
+    const handleReject = useCallback(async (incidentId: string) => {
+        try {
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+            await fetch(`${API_URL}/incidents/${incidentId}/approve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reject', adminId: 'admin' })
+            });
+            setIncidents(prev => prev.map(inc => 
+                inc.id === incidentId 
+                    ? { ...inc, status: 'rejected' as const }
+                    : inc
+            ));
+        } catch (e) {
+            console.error('Failed to reject incident:', e);
+        }
     }, []);
 
     // Handle view on map

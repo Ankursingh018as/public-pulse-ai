@@ -1,0 +1,100 @@
+# Render Blueprint — Public Pulse Civic Intelligence Platform
+# Deploy: Connect this repo on Render → it auto-detects this file
+
+databases:
+  - name: pulse-db
+    plan: free
+    databaseName: pulse_db
+    user: pulse
+    postgresMajorVersion: "16"
+    ipAllowList: []
+
+  - name: pulse-redis
+    plan: free
+
+services:
+  # ─── API Gateway (Express + TypeScript) ───
+  - type: web
+    name: pulse-api
+    runtime: node
+    plan: free
+    rootDir: services/api-gateway
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: pulse-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: pulse-db
+          property: port
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: pulse-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: pulse-db
+          property: password
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: pulse-db
+          property: database
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pulse-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: pulse-redis
+          property: connectionString
+      - key: MONGODB_URI
+        sync: false  # Set manually in Render dashboard
+      - key: CORS_ORIGINS
+        sync: false  # Set after deploy: https://pulse-citizen.onrender.com,https://pulse-admin.onrender.com
+      - key: AI_ENGINE_URL
+        value: ""  # Optional: set if deploying AI engine
+
+  # ─── Citizen App (Next.js) ───
+  - type: web
+    name: pulse-citizen
+    runtime: node
+    plan: free
+    rootDir: frontend/citizen-app
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: NEXT_PUBLIC_API_URL
+        sync: false  # Set after deploy: https://pulse-api.onrender.com/api/v1
+      - key: NEXT_PUBLIC_WS_URL
+        sync: false  # Set after deploy: https://pulse-api.onrender.com
+
+  # ─── Admin Dashboard (Next.js) ───
+  - type: web
+    name: pulse-admin
+    runtime: node
+    plan: free
+    rootDir: frontend/admin-dashboard
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "10000"
+      - key: NEXT_PUBLIC_API_URL
+        sync: false  # Set after deploy: https://pulse-api.onrender.com/api/v1
+      - key: NEXT_PUBLIC_WS_URL
+        sync: false  # Set after deploy: https://pulse-api.onrender.com

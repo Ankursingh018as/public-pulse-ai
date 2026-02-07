@@ -48,7 +48,7 @@ export default function AnalyticsDashboard() {
     const fetchAnalytics = async () => {
         setRefreshing(true);
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002/api/v1';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
             const [summaryRes, trendsRes, typeRes, perfRes] = await Promise.all([
                 fetch(`${API_URL}/analytics/summary?days=${parseInt(timeRange)}`),
@@ -96,13 +96,13 @@ export default function AnalyticsDashboard() {
             setStats({
                 totalPredictions: summary.data?.active_predictions || 0,
                 highRisk: summary.data?.high_risk_count || 0,
-                mediumRisk: Math.floor(Math.random() * 20) + 10,
-                lowRisk: Math.floor(Math.random() * 30) + 15,
+                mediumRisk: summary.data?.medium_risk_count || 0,
+                lowRisk: summary.data?.low_risk_count || 0,
                 typeDistribution,
-                avgResponseTime: Math.round(perf.data?.avg_resolution_time_mins || 45),
-                resolutionRate: perf.data?.resolution_rate || 78,
-                citizenReports: Math.floor(Math.random() * 100) + 50,
-                aiAccuracy: 94,
+                avgResponseTime: Math.round(perf.data?.avg_resolution_time_mins || 0),
+                resolutionRate: perf.data?.resolution_rate || 0,
+                citizenReports: summary.data?.citizen_reports || 0,
+                aiAccuracy: summary.data?.ai_accuracy || 0,
                 alerts: {
                     pending: (parseInt(summary.data?.recent_alerts || 0) - parseInt(summary.data?.resolved_alerts || 0)),
                     last_24h: summary.data?.recent_alerts || 0,
@@ -113,34 +113,20 @@ export default function AnalyticsDashboard() {
 
         } catch (e) {
             console.error('Failed to fetch analytics', e);
-            // Set mock data for demo
+            // Set empty state - rely on real data only
             setStats({
-                totalPredictions: 127,
-                highRisk: 12,
-                mediumRisk: 34,
-                lowRisk: 81,
-                typeDistribution: [
-                    { name: 'traffic', value: 45, fill: TYPE_COLORS.traffic },
-                    { name: 'water', value: 28, fill: TYPE_COLORS.water },
-                    { name: 'garbage', value: 22, fill: TYPE_COLORS.garbage },
-                    { name: 'light', value: 18, fill: TYPE_COLORS.light },
-                    { name: 'road', value: 14, fill: TYPE_COLORS.road }
-                ],
-                avgResponseTime: 42,
-                resolutionRate: 78,
-                citizenReports: 89,
-                aiAccuracy: 94,
-                alerts: { pending: 8, last_24h: 23, resolved: 15, critical: 3 }
+                totalPredictions: 0,
+                highRisk: 0,
+                mediumRisk: 0,
+                lowRisk: 0,
+                typeDistribution: [],
+                avgResponseTime: 0,
+                resolutionRate: 0,
+                citizenReports: 0,
+                aiAccuracy: 0,
+                alerts: { pending: 0, last_24h: 0, resolved: 0, critical: 0 }
             });
-            setTrendData([
-                { date: 'Jan 26', predictions: 18, incidents: 12, resolved: 8 },
-                { date: 'Jan 27', predictions: 22, incidents: 15, resolved: 11 },
-                { date: 'Jan 28', predictions: 19, incidents: 14, resolved: 13 },
-                { date: 'Jan 29', predictions: 28, incidents: 20, resolved: 16 },
-                { date: 'Jan 30', predictions: 24, incidents: 18, resolved: 15 },
-                { date: 'Jan 31', predictions: 31, incidents: 22, resolved: 19 },
-                { date: 'Feb 1', predictions: 27, incidents: 19, resolved: 17 }
-            ]);
+            setTrendData([]);
         } finally {
             setLoading(false);
             setRefreshing(false);

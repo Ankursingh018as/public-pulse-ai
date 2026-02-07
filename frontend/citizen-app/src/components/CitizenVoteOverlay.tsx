@@ -27,74 +27,25 @@ export default function CitizenVoteOverlay({ incidents, onVoteCountChange }: Cit
   const [votes, setVotes] = useState<Vote[]>([]);
   const map = useMap();
 
-  // Simulate citizen votes appearing over time
+  // WebSocket vote listener placeholder
+  // In production, connect to Socket.io 'incident:vote' events
   useEffect(() => {
-    if (incidents.length === 0) return;
+    return () => { /* cleanup */ };
+  }, []);
 
-    const generateVote = () => {
-      // Pick a random incident with some probability weighting by severity
-      const weightedIncidents = incidents.filter(i => i.severity > 0.3 && !i.resolved);
-      if (weightedIncidents.length === 0) return;
-
-      const incident = weightedIncidents[Math.floor(Math.random() * weightedIncidents.length)];
-      
-      // Generate vote type (60% yes, 25% no, 15% photo)
-      const rand = Math.random();
-      const type: 'yes' | 'no' | 'photo' = rand < 0.6 ? 'yes' : rand < 0.85 ? 'no' : 'photo';
-
-      // Position vote slightly offset from incident center
-      const offsetLat = (Math.random() - 0.5) * 0.003;
-      const offsetLng = (Math.random() - 0.5) * 0.003;
-
-      const newVote: Vote = {
-        id: `vote-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        incidentId: incident.id,
-        type,
-        lat: incident.lat + offsetLat,
-        lng: incident.lng + offsetLng,
-        timestamp: Date.now()
-      };
-
-      setVotes(prev => [...prev, newVote].slice(-100)); // Keep last 100 votes
-
-      // Update incident verification count if it's a 'yes' vote
-      if (type === 'yes' && incident.verified !== undefined) {
-        incident.verified = (incident.verified || 0) + 1;
-      }
-    };
-
-    // Generate votes periodically (every 5-15 seconds)
-    const voteInterval = setInterval(() => {
-      if (Math.random() < 0.7) { // 70% chance each tick
-        generateVote();
-      }
-    }, 5000 + Math.random() * 10000);
-
-    // Initial vote burst
-    setTimeout(() => {
-      for (let i = 0; i < 3; i++) {
-        setTimeout(generateVote, i * 500);
-      }
-    }, 2000);
-
-    return () => clearInterval(voteInterval);
-  }, [incidents]);
-
-  // Calculate vote counts per incident
+  // Aggregate vote counts per incident
   const voteCounts = useMemo(() => {
     const counts: Record<string, { yes: number; no: number; photo: number }> = {};
-    
     votes.forEach(vote => {
       if (!counts[vote.incidentId]) {
         counts[vote.incidentId] = { yes: 0, no: 0, photo: 0 };
       }
       counts[vote.incidentId][vote.type]++;
     });
-
     return counts;
   }, [votes]);
 
-  // Notify parent of vote count changes
+  // Notify parent of count changes
   useEffect(() => {
     if (onVoteCountChange) {
       Object.entries(voteCounts).forEach(([incidentId, counts]) => {
@@ -103,14 +54,13 @@ export default function CitizenVoteOverlay({ incidents, onVoteCountChange }: Cit
     }
   }, [voteCounts, onVoteCountChange]);
 
-  // Remove old votes (fade out after 30 seconds)
+  // Cleanup old votes (fade after 30s)
   useEffect(() => {
-    const cleanup = setInterval(() => {
+    const interval = setInterval(() => {
       const cutoff = Date.now() - 30000;
       setVotes(prev => prev.filter(v => v.timestamp > cutoff));
     }, 5000);
-
-    return () => clearInterval(cleanup);
+    return () => clearInterval(interval);
   }, []);
 
   return (

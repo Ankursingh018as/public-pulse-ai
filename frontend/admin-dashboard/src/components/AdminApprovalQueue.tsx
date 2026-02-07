@@ -26,16 +26,20 @@ export default function AdminApprovalQueue({ incidents, onApprove, onReject, onV
 
   const handleApprove = useCallback(async (id: string) => {
     setProcessingId(id);
-    await new Promise(r => setTimeout(r, 500)); // Simulate network delay
-    onApprove(id);
-    setProcessingId(null);
+    try {
+      await onApprove(id);
+    } finally {
+      setProcessingId(null);
+    }
   }, [onApprove]);
 
   const handleReject = useCallback(async (id: string) => {
     setProcessingId(id);
-    await new Promise(r => setTimeout(r, 500));
-    onReject(id);
-    setProcessingId(null);
+    try {
+      await onReject(id);
+    } finally {
+      setProcessingId(null);
+    }
   }, [onReject]);
 
   const getSeverityColor = (severity: number) => {

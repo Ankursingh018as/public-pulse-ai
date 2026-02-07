@@ -105,44 +105,26 @@ function CitizenVoteLayer({ incidents }: { incidents: Incident[] }) {
     }>>([]);
 
     useEffect(() => {
-        if (incidents.length === 0) return;
+        // In production, listen to WebSocket 'incident:vote' events
+        // to display real-time vote markers from actual citizen activity
+        // For now, vote counts are included in incident data from API
 
-        const generateVote = () => {
-            const approvedOrPending = incidents.filter(i => i.status === 'approved' || i.status === 'pending');
-            if (approvedOrPending.length === 0) return;
+        // Real implementation would use Socket.io:
+        // socket.on('incident:vote', (data) => {
+        //   const newVote = {
+        //     id: data.voteId,
+        //     incidentId: data.incidentId,
+        //     type: data.response,
+        //     lat: data.location.lat,
+        //     lng: data.location.lng,
+        //     timestamp: Date.now()
+        //   };
+        //   setVotes(prev => [...prev, newVote].slice(-80));
+        // });
 
-            const incident = approvedOrPending[Math.floor(Math.random() * approvedOrPending.length)];
-            const rand = Math.random();
-            const type: 'yes' | 'no' | 'photo' = rand < 0.6 ? 'yes' : rand < 0.85 ? 'no' : 'photo';
-
-            const newVote = {
-                id: `vote-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                incidentId: incident.id,
-                type,
-                lat: incident.lat + (Math.random() - 0.5) * 0.004,
-                lng: incident.lng + (Math.random() - 0.5) * 0.004,
-                timestamp: Date.now()
-            };
-
-            setVotes(prev => [...prev, newVote].slice(-80));
-
-            // Update incident vote counts
-            if (incident.citizenVotes) {
-                incident.citizenVotes[type]++;
-                if (type === 'yes') incident.verified++;
-            }
+        return () => {
+            // Cleanup WebSocket listeners
         };
-
-        const interval = setInterval(() => {
-            if (Math.random() < 0.6) generateVote();
-        }, 4000);
-
-        // Initial burst
-        setTimeout(() => {
-            for (let i = 0; i < 5; i++) setTimeout(generateVote, i * 400);
-        }, 1000);
-
-        return () => clearInterval(interval);
     }, [incidents]);
 
     // Cleanup old votes
@@ -203,88 +185,22 @@ export default function LeafletMap({
 }: LeafletMapProps) {
     const [internalIncidents, setInternalIncidents] = useState<Incident[]>([]);
     
-    // Use external incidents if provided AND non-empty, otherwise internal
-    const hasExternalIncidents = externalIncidents && externalIncidents.length > 0;
-    const incidents = hasExternalIncidents ? externalIncidents : internalIncidents;
+    // Use external incidents if provided, otherwise internal (from API)
+    const incidents = externalIncidents || internalIncidents;
 
-    // Generate dynamic incidents
+    // In production, incidents come from API via parent component
+    // No need for local simulation/generation
     useEffect(() => {
-        // Skip generation only if external incidents are already provided with data
-        if (hasExternalIncidents) return;
-
-        const generateIncident = (): Incident => {
-            const types = ['traffic', 'garbage', 'water', 'light'];
-            const type = types[Math.floor(Math.random() * types.length)];
-            const severity = Number((Math.random() * 0.6 + 0.2).toFixed(2));
-
-            return {
-                id: `inc-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                event_type: type,
-                lat: VadodaraCenter[0] + (Math.random() - 0.5) * 0.06,
-                lng: VadodaraCenter[1] + (Math.random() - 0.5) * 0.06,
-                severity,
-                radius: 100 + severity * 400,
-                verified: 0,
-                citizenVotes: { yes: 0, no: 0, photo: 0 },
-                status: 'pending', // All start as pending
-                resolved: false,
-                createdAt: Date.now()
-            };
-        };
-
-        // Initial incidents
-        const initial = Array(5).fill(null).map(generateIncident);
-        setInternalIncidents(initial);
-        
-        // Immediately notify parent
-        if (onIncidentsChange) {
-            onIncidentsChange(initial);
+        // If no external incidents provided, component expects parent to fetch from API
+        // and pass via externalIncidents prop
+        if (!externalIncidents) {
+            console.warn('LeafletMap: No incidents provided. Parent should fetch from API.');
         }
 
-        // Generate new incidents periodically
-        const genInterval = setInterval(() => {
-            setInternalIncidents(prev => {
-                const newIncidents = [generateIncident(), ...prev].slice(0, 30);
-                if (onIncidentsChange) onIncidentsChange(newIncidents);
-                return newIncidents;
-            });
-        }, 15000);
-
-        // Evolution loop
-        const evolveInterval = setInterval(() => {
-            setInternalIncidents(prev => {
-                const evolved = prev.map(inc => {
-                    if (inc.resolved || inc.status === 'rejected') {
-                        inc.severity = Math.max(0, inc.severity - 0.03);
-                        return inc.severity <= 0.05 ? { ...inc, toRemove: true } as any : inc;
-                    }
-
-                    // Only approved incidents evolve naturally
-                    if (inc.status === 'approved') {
-                        if (inc.verified > 0) {
-                            inc.severity = Math.min(1, inc.severity + 0.01 * Math.min(inc.verified, 5));
-                            inc.radius += 3 * Math.min(inc.verified, 5);
-                        }
-                    }
-
-                    // Pending incidents slowly fade if unverified
-                    if (inc.status === 'pending' && inc.citizenVotes.yes === 0) {
-                        inc.severity = Math.max(0.1, inc.severity - 0.005);
-                    }
-
-                    return inc;
-                }).filter((i: any) => !i.toRemove);
-                
-                if (onIncidentsChange) onIncidentsChange(evolved);
-                return evolved;
-            });
-        }, 4000);
-
         return () => {
-            clearInterval(genInterval);
-            clearInterval(evolveInterval);
+            // Cleanup if needed
         };
-    }, [hasExternalIncidents, onIncidentsChange]);
+    }, [externalIncidents, onIncidentsChange]);
 
     // Transform to heatmap points (only approved incidents)
     const heatPoints: [number, number, number][] = [

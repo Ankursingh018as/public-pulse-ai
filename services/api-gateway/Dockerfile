@@ -1,14 +1,26 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+RUN npm ci
+
+COPY tsconfig.json ./
+COPY src/ ./src/
+
+RUN npx tsc
+
+# --- Production image ---
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy shared schemas if they exist (assuming context is root or structure allows)
-# In monorepo docker compose, we mount volumes, but for build we might need copy
-# For this setup, we'll install dependencies
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev && npm cache clean --force
 
-COPY package.json ./
-RUN npm install
+COPY --from=builder /app/dist ./dist
 
-COPY . .
+ENV NODE_ENV=production
+EXPOSE 10000
 
-CMD ["npm", "run", "dev"]
+CMD ["node", "dist/server.js"]

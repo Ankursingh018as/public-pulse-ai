@@ -15,6 +15,17 @@ export default function IncidentDrawer({ incident, onClose, onVerify }: Incident
 
     if (!incident) return null;
 
+    const getTimeAgo = (ts: number | string | undefined) => {
+        if (!ts) return 'recently';
+        const diff = Date.now() - (typeof ts === 'string' ? new Date(ts).getTime() : ts);
+        const mins = Math.floor(diff / 60000);
+        if (mins < 1) return 'just now';
+        if (mins < 60) return `${mins}m ago`;
+        const hours = Math.floor(mins / 60);
+        if (hours < 24) return `${hours}h ago`;
+        return `${Math.floor(hours / 24)}d ago`;
+    };
+
     const isHighSeverity = incident.severity > 0.6;
     const severityColor = isHighSeverity ? 'text-red-400' : incident.severity > 0.3 ? 'text-orange-400' : 'text-yellow-400';
     const severityLabel = isHighSeverity ? 'CRITICAL' : incident.severity > 0.3 ? 'MODERATE' : 'MINOR';
@@ -49,7 +60,7 @@ export default function IncidentDrawer({ incident, onClose, onVerify }: Incident
                             </div>
                             <h2 className="text-2xl font-bold text-white capitalize">{incident.event_type} Reported</h2>
                             <p className="text-sm text-slate-400 flex items-center gap-1 mt-1">
-                                <MapPin size={14} /> Near Vadodara Central • <Clock size={14} className="ml-2" /> 5m ago
+                                <MapPin size={14} /> Vadodara • <Clock size={14} className="ml-2" /> {getTimeAgo(incident.createdAt)}
                             </p>
                         </div>
                         <button
@@ -103,7 +114,10 @@ export default function IncidentDrawer({ incident, onClose, onVerify }: Incident
                     </div>
 
                     {/* Directions Button */}
-                    <button className="w-full mt-6 bg-slate-800 hover:bg-slate-700 text-cyan-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 border border-cyan-500/20 active:scale-95 transition">
+                    <button 
+                        onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${incident.lat},${incident.lng}`, '_blank')}
+                        className="w-full mt-6 bg-slate-800 hover:bg-slate-700 text-cyan-400 py-3 rounded-xl font-bold flex items-center justify-center gap-2 border border-cyan-500/20 active:scale-95 transition"
+                    >
                         <Navigation size={18} /> Get Safety Directions
                     </button>
                 </div>

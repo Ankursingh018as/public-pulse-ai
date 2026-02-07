@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { pgPool } from '../server';
+import { Incident } from '../models';
 
 export const historyRouter = Router();
 
@@ -8,118 +8,89 @@ historyRouter.get('/', async (req, res) => {
     try {
         const { type, since, limit = 500, source, status } = req.query;
 
-        let query = `
-            SELECT 
-                ci.id,
-                ci.type,
-                ci.type as event_type,
-                ci.latitude as lat,
-                ci.longitude as lng,
-                ci.description,
-                ci.source,
-                ci.user_id as "userId",
-                ci.status,
-                ci.severity,
-                ci.admin_notes as "adminNotes",
-                ci.updated_by as "updatedBy",
-                EXTRACT(EPOCH FROM ci.created_at) * 1000 as "_ts",
-                EXTRACT(EPOCH FROM ci.created_at) * 1000 as "createdAt",
-                EXTRACT(EPOCH FROM ci.updated_at) * 1000 as "updatedAt",
-                a.name as area_name,
-                (SELECT COUNT(*) FROM citizen_verifications cv WHERE cv.incident_id = ci.id) as verification_count
-            FROM civic_issues ci
-            LEFT JOIN areas a ON ci.area_id = a.id
-            WHERE 1=1
-        `;
-        const params: any[] = [];
+        const query: any = {};
 
-        if (type) {
-            query += ` AND ci.type = $${params.length + 1}`;
-            params.push(type);
-        }
+        if (type) query.event_type = type;
+        if (source) query.source = new RegExp(source as string, 'i');
+        if (status) query.status = status;
+        if (since) query.createdAt = { $gte: new Date(since as string) };
 
-        if (source) {
-            query += ` AND ci.source ILIKE $${params.length + 1}`;
-            params.push(`%${source}%`);
-        }
+        const incidents = await Incident.find(query)
+            .sort({ createdAt: -1 })
+            .limit(Number(limit))
+            .lean();
 
-        if (status) {
-            query += ` AND ci.status = $${params.length + 1}`;
-            params.push(status);
-        }
-
-        if (since) {
-            query += ` AND ci.created_at >= to_timestamp($${params.length + 1} / 1000.0)`;
-            params.push(Number(since));
-        }
-
-        query += ` ORDER BY ci.created_at DESC LIMIT $${params.length + 1}`;
-        params.push(Number(limit));
-
-        const result = await pgPool.query(query, params);
-        res.json(result.rows);
+        res.json({
+            success: true,
+            count: incidents.length,
+            data: incidents.map(inc => ({
+                id: inc._id,
+                type: inc.event_type,
+                event_type: inc.event_type,
+                lat: inc.lat,
+                lng: inc.lng,
+                description: inc.description,
+                source: inc.source,
+                userId: inc.reported_by,
+                status: inc.status,
+                severity: inc.severity,
+                area_name: inc.area_name,
+                zone: inc.zone,
+                _ts: inc.createdAt.getTime(),
+                createdAt: inc.createdAt.getTime(),
+                updatedAt: inc.updatedAt?.getTime() || inc.createdAt.getTime(),
+                resolved: inc.resolved,
+                resolved_at: inc.resolved_at
+            }))
+        });
     } catch (err) {
-        console.error('History fetch error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error fetching history:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch history' });
     }
 });
 
-// GET /api/v1/history/stats - Get aggregated history stats
+// GET /api/v1/history/stats - Get historical statistics
 historyRouter.get('/stats', async (req, res) => {
     try {
-        const query = `
-            SELECT 
-                COUNT(*) as total,
-                COUNT(*) FILTER (WHERE status = 'pending' OR status IS NULL) as pending,
-                COUNT(*) FILTER (WHERE status = 'approved') as approved,
-                COUNT(*) FILTER (WHERE status = 'rejected') as rejected,
-                COUNT(*) FILTER (WHERE status = 'resolved') as resolved,
-                COUNT(*) FILTER (WHERE source ILIKE '%citizen%') as citizen_reports,
-                COUNT(*) FILTER (WHERE source = 'ai' OR source ILIKE '%ai-%') as ai_detections,
-                COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '24 hours') as last_24h,
-                COUNT(*) FILTER (WHERE created_at > NOW() - INTERVAL '7 days') as last_7d
-            FROM civic_issues
-        `;
+        const { period = '30d' } = req.query;
+        
+        let days = 30;
+        if (period === '7d') days = 7;
+        else if (period === '90d') days = 90;
 
-        const result = await pgPool.query(query);
-        res.json(result.rows[0]);
-    } catch (err) {
-        console.error('History stats error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
-    }
-});
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - days);
 
-// GET /api/v1/history/export - Export all data for reports
-historyRouter.get('/export', async (req, res) => {
-    try {
-        const [incidents, verifications, predictions] = await Promise.all([
-            pgPool.query(`
-                SELECT ci.*, a.name as area_name
-                FROM civic_issues ci
-                LEFT JOIN areas a ON ci.area_id = a.id
-                ORDER BY ci.created_at DESC
-                LIMIT 5000
-            `),
-            pgPool.query(`
-                SELECT * FROM citizen_verifications
-                ORDER BY created_at DESC
-                LIMIT 5000
-            `),
-            pgPool.query(`
-                SELECT * FROM predictions
-                ORDER BY created_at DESC
-                LIMIT 1000
-            `)
+        const stats = await Incident.aggregate([
+            { $match: { createdAt: { $gte: startDate } } },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: 1 },
+                    resolved: { $sum: { $cond: ['$resolved', 1, 0] } },
+                    pending: { $sum: { $cond: [{ $eq: ['$status', 'pending'] }, 1, 0] } },
+                    avgSeverity: { $avg: '$severity' }
+                }
+            }
+        ]);
+
+        const typeDistribution = await Incident.aggregate([
+            { $match: { createdAt: { $gte: startDate } } },
+            { $group: { _id: '$event_type', count: { $sum: 1 } } },
+            { $sort: { count: -1 } }
         ]);
 
         res.json({
-            incidents: incidents.rows,
-            verifications: verifications.rows,
-            predictions: predictions.rows,
-            exportedAt: Date.now()
+            success: true,
+            data: {
+                summary: stats[0] || { total: 0, resolved: 0, pending: 0, avgSeverity: 0 },
+                byType: typeDistribution,
+                period: period
+            }
         });
     } catch (err) {
-        console.error('History export error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Error fetching history stats:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch statistics' });
     }
 });
+

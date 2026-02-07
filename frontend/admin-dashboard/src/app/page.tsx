@@ -44,22 +44,34 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+                
+                // Fetch both, but handle each independently
                 const [predRes, incRes] = await Promise.all([
-                    fetch(`${API_URL}/predictions`),
-                    fetch(`${API_URL}/incidents?limit=100`)
+                    fetch(`${API_URL}/predictions`).catch(() => null),
+                    fetch(`${API_URL}/incidents?limit=100`).catch(() => null)
                 ]);
 
-                const predData = await predRes.json();
-                const incData = await incRes.json();
+                let predictions = [];
+                let incidents = [];
 
-                if (predData.data) {
-                    setPredictions(predData.data);
-                    setStats(s => ({
-                        ...s,
-                        predictions: predData.data.length,
-                        issues: incData.data?.length || 0
-                    }));
+                // Handle predictions response
+                if (predRes && predRes.ok) {
+                    const predData = await predRes.json();
+                    predictions = predData.data || [];
+                    setPredictions(predictions);
                 }
+
+                // Handle incidents response (this should work even if predictions fail)
+                if (incRes && incRes.ok) {
+                    const incData = await incRes.json();
+                    incidents = incData.data || [];
+                }
+
+                setStats({
+                    predictions: predictions.length,
+                    issues: incidents.length
+                });
+
             } catch (err) {
                 console.error("Failed to fetch dashboard data", err);
             } finally {
@@ -197,14 +209,25 @@ export default function Dashboard() {
 
 function AlertsView() {
     const [alerts, setAlerts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchAlerts = async () => {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
-            const res = await fetch(`${API_URL}/alerts?limit=50`);
-            if (res.ok) {
-                const data = await res.json();
-                setAlerts(data.data || []);
+            try {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+                const res = await fetch(`${API_URL}/alerts?limit=50`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setAlerts(data.data || []);
+                } else {
+                    setError('Failed to load alerts');
+                }
+            } catch (err) {
+                console.error('Error fetching alerts:', err);
+                setError('Unable to connect to server');
+            } finally {
+                setLoading(false);
             }
         }
         fetchAlerts();
@@ -214,6 +237,29 @@ function AlertsView() {
         <div className="space-y-6 animate-fade-in">
             <div className="glass p-6 rounded-2xl">
                 <h3 className="text-xl font-bold text-white mb-6">Alert Center</h3>
+                
+                {loading && (
+                    <div className="text-center py-8 text-slate-400">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto mb-2"></div>
+                        Loading alerts...
+                    </div>
+                )}
+                
+                {error && !loading && (
+                    <div className="text-center py-8 text-amber-400 bg-amber-500/10 rounded-lg border border-amber-500/20">
+                        <Bell className="mx-auto mb-2" size={32} />
+                        <p>{error}</p>
+                        <p className="text-sm text-slate-400 mt-1">Alerts feature requires MongoDB connection</p>
+                    </div>
+                )}
+                
+                {!loading && !error && alerts.length === 0 && (
+                    <div className="text-center py-8 text-slate-400">
+                        <Bell className="mx-auto mb-2" size={32} />
+                        <p>No active alerts</p>
+                    </div>
+                )}
+                
                 <div className="space-y-3">
                     {alerts.map((alert, i) => (
                         <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors flex justify-between items-center group">

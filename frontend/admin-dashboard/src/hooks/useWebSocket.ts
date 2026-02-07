@@ -25,32 +25,25 @@ export function useWebSocket(options: UseWebSocketOptions = {}) {
         });
 
         socketInstance.on('connect', () => {
-            console.log('[WS] Connected to server');
             setIsConnected(true);
-
-            // Subscribe to all predictions
             socketInstance.emit('subscribe', 'predictions');
         });
 
         socketInstance.on('disconnect', () => {
-            console.log('[WS] Disconnected from server');
             setIsConnected(false);
         });
 
         socketInstance.on('prediction:new', (data) => {
-            console.log('[WS] New prediction:', data);
             setLastEvent({ type: 'prediction', data, timestamp: new Date() });
             options.onNewPrediction?.(data);
         });
 
         socketInstance.on('incident:new', (data) => {
-            console.log('[WS] New incident:', data);
             setLastEvent({ type: 'incident', data, timestamp: new Date() });
             options.onNewIncident?.(data);
         });
 
         socketInstance.on('alert:new', (data) => {
-            console.log('[WS] New alert:', data);
             setLastEvent({ type: 'alert', data, timestamp: new Date() });
             options.onNewAlert?.(data);
         });
