@@ -66,6 +66,16 @@ app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date() });
 });
 
+app.get('/', (req, res) => {
+    res.json({
+        message: 'Public Pulse API Gateway',
+        status: 'online',
+        version: '1.0.0',
+        documentation: '/api/v1',
+        health_check: '/health'
+    });
+});
+
 app.use('/api/v1', apiRouter);
 
 // ===========================================
