@@ -95,12 +95,12 @@ This project has been **fully migrated** from PostgreSQL to **MongoDB Atlas** wi
 
 ### 1️⃣ **Environment Setup**
 
-The `.env` file is already configured with MongoDB Atlas credentials:
+The `.env` file needs MongoDB Atlas credentials:
 
 ```bash
 PORT=3002
 NODE_ENV=production
-MONGODB_URI=mongodb+srv://asr24983_db_user:ypEv0VLpSLtS58sM@pulseai.6uflizd.mongodb.net/publicpulse
+MONGODB_URI=<your-mongodb-atlas-uri>
 REDIS_HOST=localhost
 REDIS_PORT=6379
 AI_ENGINE_URL=http://localhost:8000

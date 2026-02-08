@@ -12,7 +12,7 @@ SUPER_USER = "postgres"
 SUPER_PASS = os.getenv("POSTGRES_PASSWORD") # This is the superuser password user put in .env
 
 APP_USER = "pulse"
-APP_PASS = "pulsedev123"
+APP_PASS = os.getenv("POSTGRES_PASSWORD", "")
 DB_NAME = "pulse_db"
 
 INIT_SQL_PATH = os.path.join(os.path.dirname(__file__), "db/init.sql")

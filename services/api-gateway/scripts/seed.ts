@@ -4,7 +4,7 @@ import { Area, Incident } from '../src/models';
 
 dotenv.config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://asr24983_db_user:ypEv0VLpSLtS58sM@pulseai.6uflizd.mongodb.net/publicpulse';
+const MONGODB_URI = process.env.MONGODB_URI || '';
 
 // Sample areas in Vadodara
 const areas = [

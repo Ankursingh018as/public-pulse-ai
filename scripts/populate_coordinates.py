@@ -7,7 +7,7 @@ import os
 DB_HOST = "localhost"
 DB_NAME = "pulse_db" # Updated from public_pulse based on docker-compose
 DB_USER = "pulse"    # Updated from postgres based on docker-compose
-DB_PASS = "pulsedev123" 
+DB_PASS = os.getenv("POSTGRES_PASSWORD", "") 
 
 GOOGLE_MAPS_KEY = "AIzaSyDjSAaJ3aB1VBnlYC4ANMeGMO8lzlZBX0U"
 

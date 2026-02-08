@@ -23,6 +23,7 @@ storybook-static/
 .env.development
 .env.production
 .env.test
+render-env-keys.env
 
 # IDE & Editor
 .idea/

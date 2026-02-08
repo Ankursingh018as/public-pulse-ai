@@ -19,7 +19,7 @@ const pool = new Pool({
     host: process.env.POSTGRES_HOST || 'postgres',
     port: parseInt(process.env.POSTGRES_PORT || '5432'),
     user: process.env.POSTGRES_USER || 'pulse',
-    password: process.env.POSTGRES_PASSWORD || 'pulsedev123',
+    password: process.env.POSTGRES_PASSWORD || '',
     database: process.env.POSTGRES_DB || 'pulse_db',
 });
 

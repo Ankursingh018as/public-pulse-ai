@@ -12,7 +12,7 @@ dotenv.config();
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://mongodb:27017/pulse_raw';
 const CITY_QUERY = 'Vadodara';
 const REFRESH_INTERVAL = '0 */30 * * * *'; // Every 30 minutes
-const NEWS_API_KEY = '028c1365c5db4d25b2c89899036776b3';
+const NEWS_API_KEY = process.env.NEWS_API_KEY || '';
 
 // ... (existing MongoDB setup)
 

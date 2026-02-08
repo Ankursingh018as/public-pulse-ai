@@ -160,7 +160,7 @@ curl http://localhost:3002/api/v1/analytics/hot-zones
 
 ## 🌍 **MongoDB Atlas Connection**
 
-**URI:** `mongodb+srv://asr24983_db_user:ypEv0VLpSLtS58sM@pulseai.6uflizd.mongodb.net/publicpulse`
+**URI:** Set via `MONGODB_URI` environment variable
 
 **Collections:**
 - `incidents` - Event reports

@@ -28,7 +28,7 @@ try:
         host=os.getenv("POSTGRES_HOST", "localhost"),
         port=os.getenv("POSTGRES_PORT", "5432"),
         user=os.getenv("POSTGRES_USER", "pulse"),
-        password=os.getenv("POSTGRES_PASSWORD", "pulsedev123"),
+        password=os.getenv("POSTGRES_PASSWORD", ""),
         database=os.getenv("POSTGRES_DB", "pulse_db")
     )
     redis_client = redis.Redis(

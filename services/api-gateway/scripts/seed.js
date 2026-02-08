@@ -7,7 +7,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const models_1 = require("../src/models");
 dotenv_1.default.config();
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://asr24983_db_user:ypEv0VLpSLtS58sM@pulseai.6uflizd.mongodb.net/publicpulse';
+const MONGODB_URI = process.env.MONGODB_URI || '';
 // Sample areas in Vadodara
 const areas = [
     { name: 'Alkapuri', zone: 'zone_1', lat: 22.3015, lng: 73.1818, population: 85000, risk_score: 3, active_incidents: 0 },

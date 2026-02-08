@@ -7,9 +7,9 @@ import os
 DB_HOST = "localhost"
 DB_NAME = "pulse_db"
 DB_USER = "pulse"
-DB_PASS = "pulsedev123"
+DB_PASS = os.getenv("POSTGRES_PASSWORD", "")
 
-WEATHER_API_KEY = "4b8add1648293f784bef5dcf5f7e8dd9"
+WEATHER_API_KEY = os.getenv("OPENWEATHER_API_KEY", "")
 CITY = "Vadodara"
 
 def get_live_weather():

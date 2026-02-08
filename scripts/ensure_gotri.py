@@ -6,7 +6,7 @@ import json
 DB_HOST = "localhost"
 DB_NAME = "pulse_db"
 DB_USER = "pulse"
-DB_PASS = "pulsedev123"
+DB_PASS = os.getenv("POSTGRES_PASSWORD", "")
 
 def ensure_gotri():
     try:
