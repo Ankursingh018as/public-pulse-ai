@@ -172,8 +172,8 @@ generated/
 # Debug & utility scripts
 check_*.py
 debug_*.py
-test_*.py
-run_*.py
+test_ai_engine.py
+run_schema.py
 start_locally.bat
 *.bat
 !scripts/*.bat
@@ -185,3 +185,46 @@ temp_*
 _temp*
 *.draft
 *.bak
+
+# Generated markdown docs
+CITIZEN_APP_IMPROVEMENTS.md
+DYNAMIC_DATA_VERIFICATION.md
+FILE_REVIEW_COMPLETE.md
+MIGRATION_COMPLETE.md
+PROJECT_REPORT.md
+SHOWCASE_DEMO_GUIDE.md
+SHOWCASE_PREPARATION_PLAN.md
+STATIC_DATA_REMOVAL_SUMMARY.md
+
+# Package lock (regenerated on install)
+package-lock.json
+
+# Videomodel submodule artifacts
+videomodel/export_env/
+videomodel/outputs/
+videomodel/runs/
+videomodel/data/
+videomodel/*.jpg
+videomodel/*.pt
+!videomodel/models/trash_detector_v1.pt
+
+# AI engine artifacts
+services/ai-engine/venv/
+services/ai-engine/__pycache__/
+services/ai-engine/_boot.log
+services/ai-engine/_pkl_direct.log
+services/ai-engine/uploads/
+services/ai-engine/models/*.onnx
+services/ai-engine/models/*.pt
+
+# Public-pulse-ai trained models & plots
+public-pulse-ai/*.pkl
+public-pulse-ai/*.png
+public-pulse-ai/*.csv
+
+# Notebooks checkpoints
+notebooks/.ipynb_checkpoints/
+
+# Render config
+render.yaml
+render-env-keys.env
