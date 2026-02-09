@@ -28,7 +28,7 @@ const createPulseIcon = (color: string, severity: 'high' | 'medium' | 'low', sta
     if (severity === 'high') animationClass = 'marker-pulse-red';
     if (severity === 'medium') animationClass = 'marker-pulse-orange';
 
-    const statusBadge = status === 'approved' 
+    const statusBadge = status === 'approved'
         ? '<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid #0f172a;"></div>'
         : status === 'pending'
             ? '<div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;background:#eab308;border-radius:50%;border:2px solid #0f172a;animation:pulse 1s infinite;"></div>'
@@ -176,15 +176,15 @@ interface LeafletMapProps {
     showVotes?: boolean;
 }
 
-export default function LeafletMap({ 
-    predictions = [], 
+export default function LeafletMap({
+    predictions = [],
     incidents: externalIncidents,
-    onMarkerClick, 
+    onMarkerClick,
     onIncidentsChange,
-    showVotes = true 
+    showVotes = true
 }: LeafletMapProps) {
     const [internalIncidents, setInternalIncidents] = useState<Incident[]>([]);
-    
+
     // Use external incidents if provided, otherwise internal (from API)
     const incidents = externalIncidents || internalIncidents;
 
@@ -215,10 +215,10 @@ export default function LeafletMap({
     ];
 
     return (
-        <MapContainer center={VadodaraCenter} zoom={13} style={{ height: '100%', width: '100%', background: '#0f172a' }}>
+        <MapContainer center={VadodaraCenter} zoom={13} style={{ height: '100%', width: '100%', background: '#f8fafc' }}>
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             />
 
             <HeatmapLayer points={heatPoints} />
@@ -246,9 +246,9 @@ export default function LeafletMap({
             {incidents.map((inc, idx) => {
                 const color = typeColors[inc.event_type] || typeColors.default;
                 const severity = inc.severity > 0.7 ? 'high' : inc.severity > 0.4 ? 'medium' : 'low';
-                
+
                 // Intensity color based on severity
-                const intensityColor = inc.severity >= 0.7 ? '#dc2626' : 
+                const intensityColor = inc.severity >= 0.7 ? '#dc2626' :
                     inc.severity >= 0.5 ? '#ea580c' : color;
 
                 // Only show approved incidents prominently
@@ -291,11 +291,10 @@ export default function LeafletMap({
                             <Popup>
                                 <div className="p-2 text-center min-w-[160px]">
                                     <h3 className="font-bold capitalize text-sm">{inc.event_type} Issue</h3>
-                                    <div className={`mt-1 px-2 py-0.5 rounded text-[10px] font-bold inline-block ${
-                                        inc.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                        inc.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                                        'bg-red-100 text-red-700'
-                                    }`}>
+                                    <div className={`mt-1 px-2 py-0.5 rounded text-[10px] font-bold inline-block ${inc.status === 'approved' ? 'bg-green-100 text-green-700' :
+                                            inc.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                'bg-red-100 text-red-700'
+                                        }`}>
                                         {inc.status.toUpperCase()}
                                     </div>
                                     <div className="mt-2 space-y-1 text-xs text-gray-600">

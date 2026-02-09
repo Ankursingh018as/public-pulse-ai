@@ -276,12 +276,24 @@ export async function fetchModelStatus(): Promise<any> {
   }
 }
 
+// Approve incident wrapper
+export async function approveIncident(incidentId: string, adminId: string = 'admin-1', notes?: string) {
+  return updateIncidentStatus(incidentId, 'approve', adminId, notes);
+}
+
+// Reject incident wrapper
+export async function rejectIncident(incidentId: string, adminId: string = 'admin-1', notes?: string) {
+  return updateIncidentStatus(incidentId, 'reject', adminId, notes);
+}
+
 export default {
   fetchIncidents,
   fetchPredictions,
   fetchHistory,
   fetchStats,
   updateIncidentStatus,
+  approveIncident,
+  rejectIncident,
   fetchVerifications,
   exportAllData,
   subscribeToUpdates,

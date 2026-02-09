@@ -12,6 +12,7 @@ import IncidentsView from '../components/IncidentsView';
 import AICommandCenter from '../components/AICommandCenter';
 import { useWebSocket } from '../hooks/useWebSocket';
 import adminDataService from '../services/adminDataService';
+import AdminApprovalQueue from '../components/AdminApprovalQueue';
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Live Monitor');
@@ -47,7 +48,7 @@ export default function Dashboard() {
         const fetchData = async () => {
             try {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
-                
+
                 // Fetch both, but handle each independently
                 const [predRes, incRes, statsRes] = await Promise.all([
                     fetch(`${API_URL}/predictions`).catch(() => null),
@@ -101,21 +102,18 @@ export default function Dashboard() {
     }, []);
 
     return (
-        <div className="flex min-h-screen bg-[url('/bg-dark.jpg')] bg-cover bg-fixed">
-            {/* Overlay if image missing, ensuring dark theme */}
-            <div className="fixed inset-0 bg-[#0f172a]/90 -z-10"></div>
-
+        <div className="flex min-h-screen bg-[#effcf6] text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
             {/* Notifications */}
             <div className="fixed top-4 right-4 md:top-8 md:right-8 z-[100] space-y-3 w-[90vw] max-w-80">
                 {notifications.map(n => (
-                    <div key={n.id} className={`p-3 md:p-4 rounded-xl shadow-2xl backdrop-blur-md border border-white/10 flex items-start gap-3 animate-slide-in
-                        ${n.type === 'alert' ? 'bg-red-500/80 text-white shadow-red-500/20' :
-                            n.type === 'prediction' ? 'bg-purple-600/80 text-white shadow-purple-500/20' :
-                                'bg-slate-700/80 text-white'}`}>
+                    <div key={n.id} className={`p-4 rounded-2xl shadow-lg shadow-slate-200/50 backdrop-blur-md border border-white flex items-start gap-3 animate-slide-in
+                        ${n.type === 'alert' ? 'bg-rose-50 text-rose-800 border-rose-100' :
+                            n.type === 'prediction' ? 'bg-violet-50 text-violet-800 border-violet-100' :
+                                'bg-white text-slate-800 border-slate-100'}`}>
                         <div className="mt-1"><Bell className="w-4 h-4" /></div>
                         <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold truncate">{n.message}</p>
-                            <p className="text-[10px] opacity-70 mt-1">Just now</p>
+                            <p className="text-sm font-bold truncate">{n.message}</p>
+                            <p className="text-[10px] opacity-70 mt-1 font-medium uppercase tracking-wide">Just now</p>
                         </div>
                     </div>
                 ))}
@@ -123,28 +121,28 @@ export default function Dashboard() {
 
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isConnected={isConnected} />
 
-            <main className="flex-1 lg:ml-72 p-4 md:p-6 lg:p-8 overflow-y-auto h-screen relative pt-20 lg:pt-8">
+            <main className="flex-1 lg:ml-80 p-4 md:p-6 lg:p-8 overflow-y-auto h-screen relative pt-20 lg:pt-8 w-full">
                 {/* Top Bar */}
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10 pl-12 lg:pl-0">
+                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pl-1 lg:pl-0">
                     <div>
-                        <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-white tracking-tight">Vadodara Center</h2>
-                        <p className="text-slate-400 text-xs md:text-sm mt-1">Real-time Semantic Urban Analysis</p>
+                        <h2 className="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Vadodara Center</h2>
+                        <p className="text-slate-500 text-sm mt-1 font-medium">Real-time Semantic Urban Analysis</p>
                     </div>
 
-                    <div className="flex items-center gap-2 md:gap-4 bg-white/5 p-1.5 rounded-xl md:rounded-2xl border border-white/10 backdrop-blur-md w-full sm:w-auto">
+                    <div className="flex items-center gap-2 md:gap-3 bg-white p-2 rounded-[1.25rem] border border-slate-100 shadow-sm w-full sm:w-auto">
                         <div className="relative flex-1 sm:flex-initial">
-                            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                             <input
                                 type="text"
                                 placeholder="Search areas..."
-                                className="bg-transparent text-sm text-white pl-10 pr-4 py-2 focus:outline-none w-full sm:w-48 lg:w-64 placeholder:text-slate-600"
+                                className="bg-transparent text-sm text-slate-900 pl-10 pr-4 py-2.5 focus:outline-none w-full sm:w-56 placeholder:text-slate-400 placeholder:font-medium font-medium"
                             />
                         </div>
-                        <div className="h-6 w-px bg-white/10 hidden sm:block"></div>
-                        <button className="p-2 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
+                        <div className="h-8 w-px bg-slate-100 hidden sm:block mx-1"></div>
+                        <button className="p-2.5 hover:bg-slate-50 rounded-xl text-slate-400 hover:text-indigo-600 transition-colors">
                             <Filter className="w-4 h-4" />
                         </button>
-                        <button className="p-2 hover:bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
+                        <button className="p-2.5 hover:bg-slate-50 rounded-xl text-slate-400 hover:text-indigo-600 transition-colors">
                             <Calendar className="w-4 h-4" />
                         </button>
                     </div>
@@ -160,36 +158,37 @@ export default function Dashboard() {
                             <StatCard label="Predictions" value={stats.predictions.toString()} trend="AI-powered" trendUp={true} icon={Activity} color="green" />
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
-                            {/* Map Section */}
-                            <div className="lg:col-span-8 h-[300px] md:h-[400px] lg:h-[600px] bg-slate-800/50 backdrop-blur-md rounded-2xl lg:rounded-3xl border border-white/10 overflow-hidden shadow-2xl relative">
-                                <div className="absolute top-4 left-4 z-10 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
-                                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-2">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                        LIVE FEED
-                                    </span>
-                                </div>
-                                <div className="h-full w-full grayscale-[0.3]">
-                                    <MapSimulation />
-                                </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 min-h-[600px]">
+                            {/* Incident Approval Queue (Replaces Map) */}
+                            <div className="lg:col-span-8 h-[600px]">
+                                <AdminApprovalQueue
+                                    incidents={incidents}
+                                    onApprove={async (id) => adminDataService.approveIncident(id)}
+                                    onReject={async (id) => adminDataService.rejectIncident(id)}
+                                    onViewOnMap={(incident) => {
+                                        // TODO: Switch to map tab and focus? For now just log
+                                        console.log('View on map:', incident);
+                                        setActiveTab('Map Simulation');
+                                    }}
+                                />
                             </div>
 
                             {/* Right Panel - AI Command Center + Predictions */}
-                            <div className="lg:col-span-4 flex flex-col gap-4 lg:max-h-[600px] lg:overflow-y-auto pr-1 custom-scrollbar">
+                            <div className="lg:col-span-4 flex flex-col gap-4 h-[600px] overflow-y-auto pr-1 custom-scrollbar">
                                 {/* AI Command Center */}
                                 <AICommandCenter incidents={incidents} predictions={predictions} />
 
                                 {/* Risk Forecast */}
-                                <div>
+                                <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
                                     <div className="flex justify-between items-center mb-3">
-                                        <h3 className="text-sm font-bold text-white">Risk Forecast</h3>
+                                        <h3 className="text-sm font-bold text-slate-900">Risk Forecast</h3>
                                         <span className="text-xs text-slate-500">Real-time AI</span>
                                     </div>
 
                                     <div className="space-y-3">
                                         {loading ? (
                                             <div className="flex items-center justify-center h-20">
-                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-cyan-500"></div>
+                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
                                             </div>
                                         ) : predictions.length === 0 ? (
                                             <p className="text-slate-500 text-center py-6 text-sm">No active risks detected.</p>
@@ -206,7 +205,7 @@ export default function Dashboard() {
                 )}
 
                 {activeTab === 'Map Simulation' && (
-                    <div className="h-[60vh] md:h-[80vh] rounded-2xl lg:rounded-3xl overflow-hidden glass shadow-2xl border border-white/10">
+                    <div className="h-[80vh] rounded-2xl lg:rounded-3xl overflow-hidden shadow-xl border border-slate-200">
                         <MapSimulation />
                     </div>
                 )}
@@ -218,7 +217,7 @@ export default function Dashboard() {
 
                 {/* Fallback for other tabs */}
                 {(activeTab !== 'Live Monitor' && activeTab !== 'Map Simulation' && activeTab !== 'Alerts' && activeTab !== 'Analytics' && activeTab !== 'History' && activeTab !== 'Incidents') && (
-                    <div className="flex items-center justify-center h-[60vh] text-slate-500 flex-col gap-4">
+                    <div className="flex items-center justify-center h-[60vh] text-slate-400 flex-col gap-4">
                         <Activity className="w-16 h-16 opacity-20" />
                         <p>Module Under Development</p>
                     </div>
@@ -260,14 +259,14 @@ function AlertsView() {
         <div className="space-y-6 animate-fade-in">
             <div className="glass p-6 rounded-2xl">
                 <h3 className="text-xl font-bold text-white mb-6">Alert Center</h3>
-                
+
                 {loading && (
                     <div className="text-center py-8 text-slate-400">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500 mx-auto mb-2"></div>
                         Loading alerts...
                     </div>
                 )}
-                
+
                 {error && !loading && (
                     <div className="text-center py-8 text-amber-400 bg-amber-500/10 rounded-lg border border-amber-500/20">
                         <Bell className="mx-auto mb-2" size={32} />
@@ -275,14 +274,14 @@ function AlertsView() {
                         <p className="text-sm text-slate-400 mt-1">Alerts feature requires MongoDB connection</p>
                     </div>
                 )}
-                
+
                 {!loading && !error && alerts.length === 0 && (
                     <div className="text-center py-8 text-slate-400">
                         <Bell className="mx-auto mb-2" size={32} />
                         <p>No active alerts</p>
                     </div>
                 )}
-                
+
                 <div className="space-y-3">
                     {alerts.map((alert, i) => (
                         <div key={i} className="p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors flex justify-between items-center group">

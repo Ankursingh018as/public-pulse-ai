@@ -54,7 +54,7 @@ const INTENT_RESPONSES: Record<string, (ctx: any) => string> = {
     },
     area: (ctx) => {
         const area = ctx.detectedArea;
-        const areaIncidents = ctx.allIncidents?.filter((i: any) => 
+        const areaIncidents = ctx.allIncidents?.filter((i: any) =>
             (i.area_name || '').toLowerCase().includes(area?.toLowerCase() || '')
         ) || [];
         if (!area) return "Please specify an area name (e.g., 'What's happening in Gotri?')";
@@ -67,26 +67,26 @@ const INTENT_RESPONSES: Record<string, (ctx: any) => string> = {
 
 function detectIntent(text: string): { intent: string; area?: string } {
     const lower = text.toLowerCase().trim();
-    
+
     if (/safe|danger|risk|secure/.test(lower)) return { intent: 'safety' };
     if (/traffic|jam|congestion|road block/.test(lower)) return { intent: 'traffic' };
     if (/water|flood|rain|drain|waterlog/.test(lower)) return { intent: 'water' };
     if (/report|submit|how to|complaint/.test(lower)) return { intent: 'report' };
     if (/help|what can|commands|menu/.test(lower)) return { intent: 'help' };
     if (/health|status|overview|condition|overall/.test(lower)) return { intent: 'city_health' };
-    
+
     // Area detection
     const areas = ['alkapuri', 'gotri', 'akota', 'fatehgunj', 'manjalpur', 'sayajigunj',
-                   'karelibaug', 'waghodia', 'vasna', 'makarpura', 'gorwa', 'tandalja',
-                   'subhanpura', 'nizampura', 'sama', 'chhani'];
+        'karelibaug', 'waghodia', 'vasna', 'makarpura', 'gorwa', 'tandalja',
+        'subhanpura', 'nizampura', 'sama', 'chhani'];
     for (const area of areas) {
         if (lower.includes(area)) {
             return { intent: 'area', area: area.charAt(0).toUpperCase() + area.slice(1) };
         }
     }
-    
+
     if (/what|happening|going on|update|news/.test(lower)) return { intent: 'city_health' };
-    
+
     return { intent: 'help' };
 }
 
@@ -211,67 +211,71 @@ export default function AIChatAssistant({ incidents, userLocation }: AIChatAssis
         return (
             <button
                 onClick={() => setIsOpen(true)}
-                className="bg-gradient-to-br from-cyan-500 to-blue-600 text-white p-3.5 rounded-2xl shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-cyan-400/20"
+                className="bg-white text-slate-700 p-3.5 rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center gap-2 border border-slate-200"
             >
-                <MessageCircle size={20} />
+                <div className="bg-emerald-600 text-white p-1 rounded-full">
+                    <MessageCircle size={16} />
+                </div>
                 <span className="text-sm font-bold">AI Chat</span>
-                <Sparkles size={14} className="text-cyan-200 animate-pulse" />
+                <Sparkles size={14} className="text-emerald-400 animate-pulse" />
             </button>
         );
     }
 
     return (
-        <div className="bg-[#0d0d1a]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-cyan-500/20 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] sm:max-h-[480px] flex flex-col overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] sm:max-h-[480px] flex flex-col overflow-hidden ring-1 ring-black/5">
             {/* Header */}
-            <div className="bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-3 flex items-center justify-between shrink-0">
-                <div className="flex items-center gap-2 text-white">
-                    <div className="p-1.5 bg-white/20 rounded-lg">
+            <div className="bg-white px-4 py-3 flex items-center justify-between shrink-0 border-b border-slate-100">
+                <div className="flex items-center gap-2 text-slate-900">
+                    <div className="p-1.5 bg-emerald-600 text-white rounded-lg shadow-sm">
                         <Bot size={16} />
                     </div>
                     <div>
                         <h3 className="font-bold text-sm">AI City Assistant</h3>
-                        <p className="text-[9px] text-white/70">Powered by Public Pulse AI</p>
+                        <p className="text-[9px] text-slate-500 font-medium">Powered by Public Pulse AI</p>
                     </div>
                 </div>
-                <button onClick={() => setIsOpen(false)} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors">
-                    <X size={16} className="text-white" />
+                <button
+                    onClick={() => setIsOpen(false)}
+                    className="p-1.5 hover:bg-slate-50 rounded-lg transition-colors text-slate-400 hover:text-slate-600"
+                >
+                    <X size={16} />
                 </button>
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+            <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0 bg-slate-50/50">
                 {messages.map((msg) => (
                     <div key={msg.id} className={`flex gap-2 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         {msg.role === 'assistant' && (
-                            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 mt-0.5 shadow-sm">
                                 <Bot size={12} className="text-white" />
                             </div>
                         )}
-                        <div className={`max-w-[85%] px-3 py-2 rounded-xl text-xs leading-relaxed whitespace-pre-line ${
-                            msg.role === 'user'
-                                ? 'bg-cyan-600 text-white rounded-br-sm'
-                                : 'bg-white/10 text-slate-200 border border-white/10 rounded-bl-sm'
-                        }`}>
+                        <div className={`max-w-[85%] px-3 py-2 rounded-xl text-xs leading-relaxed whitespace-pre-line shadow-sm border ${msg.role === 'user'
+                                ? 'bg-emerald-600 text-white rounded-br-sm border-emerald-600'
+                                : 'bg-white text-slate-700 border-slate-200 rounded-bl-sm'
+                            }`}>
                             {msg.content}
                         </div>
                         {msg.role === 'user' && (
-                            <div className="w-6 h-6 rounded-full bg-slate-600 flex items-center justify-center shrink-0 mt-0.5">
-                                <User size={12} className="text-white" />
+                            <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center shrink-0 mt-0.5">
+                                <User size={12} className="text-slate-500" />
                             </div>
                         )}
                     </div>
                 ))}
-                
+
                 {isTyping && (
                     <div className="flex gap-2 items-center">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
                             <Bot size={12} className="text-white" />
                         </div>
-                        <div className="bg-white/10 border border-white/10 px-3 py-2 rounded-xl rounded-bl-sm">
+                        <div className="bg-white border border-slate-200 px-3 py-2 rounded-xl rounded-bl-sm shadow-sm">
                             <div className="flex gap-1">
-                                <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:0ms]"></span>
-                                <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:150ms]"></span>
-                                <span className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-bounce [animation-delay:300ms]"></span>
+                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:0ms]"></span>
+                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:150ms]"></span>
+                                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce [animation-delay:300ms]"></span>
                             </div>
                         </div>
                     </div>
@@ -281,12 +285,12 @@ export default function AIChatAssistant({ incidents, userLocation }: AIChatAssis
 
             {/* Quick Actions */}
             {messages.length <= 2 && (
-                <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+                <div className="px-3 pb-2 flex gap-1.5 overflow-x-auto no-scrollbar shrink-0 bg-white">
                     {quickActions.map((action) => (
                         <button
                             key={action.label}
                             onClick={() => { setInput(action.query); }}
-                            className="px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] text-slate-300 whitespace-nowrap hover:bg-white/10 transition-colors"
+                            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[10px] text-slate-600 font-medium whitespace-nowrap hover:bg-slate-100 hover:border-slate-300 transition-colors"
                         >
                             {action.label}
                         </button>
@@ -295,8 +299,8 @@ export default function AIChatAssistant({ incidents, userLocation }: AIChatAssis
             )}
 
             {/* Input */}
-            <div className="p-3 border-t border-white/10 shrink-0">
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+            <div className="p-3 border-t border-slate-100 shrink-0 bg-white">
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 focus-within:border-emerald-300 focus-within:ring-2 focus-within:ring-emerald-100 transition-all">
                     <input
                         ref={inputRef}
                         type="text"
@@ -304,13 +308,13 @@ export default function AIChatAssistant({ incidents, userLocation }: AIChatAssis
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Ask about your city..."
-                        className="flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 focus:outline-none"
+                        className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
                         disabled={isTyping}
                     />
                     <button
                         onClick={handleSend}
                         disabled={!input.trim() || isTyping}
-                        className="p-1.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg text-white disabled:opacity-30 transition-colors"
+                        className="p-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white disabled:opacity-30 transition-colors shadow-sm"
                     >
                         <Send size={14} />
                     </button>

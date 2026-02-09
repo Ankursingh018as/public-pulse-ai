@@ -9,8 +9,14 @@ module.exports = {
     theme: {
         extend: {
             colors: {
-                sidebar: "#1E293B",
-                active: "#3B82F6",
+                sidebar: "#FFFFFF",
+                sidebarText: "#1E293B",
+                primary: "#2563EB", // Blue 600
+                secondary: "#64748B", // Slate 500
+                background: "#F8FAFC", // Slate 50
+                surface: "#FFFFFF",
+                border: "#E2E8F0", // Slate 200
+                active: "#EFF6FF", // Blue 50
             },
         },
     },

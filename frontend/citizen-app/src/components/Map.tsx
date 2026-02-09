@@ -306,10 +306,10 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange, 
         className="h-full w-full z-0"
         zoomControl={false}
         attributionControl={false}
-        style={{ background: '#0a0a0a' }}
+        style={{ background: '#f8fafc' }}
       >
         <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           maxZoom={19}
         />
 
@@ -331,13 +331,13 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange, 
             }}
             eventHandlers={{ click: () => onMarkerClick?.(pred) }}
           >
-            <Popup className="dark-popup">
-              <div className="text-sm bg-[#1a1a1a] text-white p-2 rounded-lg min-w-[140px] -m-3">
-                <strong className="capitalize text-cyan-400">{pred.type}</strong>
-                <span className="text-slate-400 text-xs ml-1">Prediction</span>
-                <div className="text-slate-400 text-xs mt-1">
-                  <div>Probability: <span className="text-white">{Math.round(pred.probability * 100)}%</span></div>
-                  <div>Area: <span className="text-white">{pred.area_name}</span></div>
+            <Popup className="light-popup">
+              <div className="text-sm bg-white text-slate-800 p-2 rounded-lg min-w-[140px] -m-3 shadow-sm border border-slate-100">
+                <strong className="capitalize text-blue-600">{pred.type}</strong>
+                <span className="text-slate-500 text-xs ml-1">Prediction</span>
+                <div className="text-slate-500 text-xs mt-1">
+                  <div>Probability: <span className="text-slate-900 font-semibold">{Math.round(pred.probability * 100)}%</span></div>
+                  <div>Area: <span className="text-slate-900">{pred.area_name}</span></div>
                 </div>
               </div>
             </Popup>
@@ -364,27 +364,27 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange, 
               }}
               eventHandlers={{ click: () => onMarkerClick?.(inc) }}
             >
-              <Popup className="dark-popup">
-                <div className="text-sm bg-[#1a1a1a] text-white p-3 rounded-lg min-w-[160px] -m-3">
+              <Popup className="light-popup">
+                <div className="text-sm bg-white text-slate-800 p-3 rounded-lg min-w-[160px] -m-3 shadow-md border border-slate-100">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }}></span>
-                    <strong className="capitalize">{inc.type || inc.event_type}</strong>
-                    {isVerified && <span className="text-emerald-400 text-xs">✓</span>}
+                    <strong className="capitalize text-slate-900">{inc.type || inc.event_type}</strong>
+                    {isVerified && <span className="text-emerald-600 text-xs font-bold">✓ Verified</span>}
                   </div>
-                  <div className="text-slate-400 text-xs space-y-1">
+                  <div className="text-slate-500 text-xs space-y-1">
                     <div className="flex justify-between">
                       <span>Severity</span>
-                      <span className="text-white">{Math.round(inc.severity * 100)}%</span>
+                      <span className="text-slate-900 font-medium">{Math.round(inc.severity * 100)}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Verifications</span>
-                      <span className="text-white">{inc.verified}</span>
+                      <span className="text-slate-900 font-medium">{inc.verified}</span>
                     </div>
-                    {inc.description && <div className="italic text-slate-500 mt-1">"{inc.description}"</div>}
+                    {inc.description && <div className="italic text-slate-500 mt-1 border-t border-slate-100 pt-1">"{inc.description}"</div>}
                   </div>
                   <button
                     onClick={() => onMarkerClick?.(inc)}
-                    className="mt-3 w-full px-3 py-1.5 bg-cyan-500/20 text-cyan-400 text-xs rounded-lg hover:bg-cyan-500/30 border border-cyan-500/30 font-medium"
+                    className="mt-3 w-full px-3 py-1.5 bg-blue-50 text-blue-600 text-xs rounded-lg hover:bg-blue-100 border border-blue-200 font-medium transition-colors"
                   >
                     Verify Issue
                   </button>
@@ -407,7 +407,7 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange, 
             }}
           >
             <Popup>
-              <div className="text-sm font-medium">📍 Your Location</div>
+              <div className="text-sm font-medium text-slate-800">📍 Your Location</div>
             </Popup>
           </CircleMarker>
         )}
@@ -432,35 +432,35 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange, 
               }
             }}
           >
-            <Popup className="dark-popup">
-              <div className="text-sm bg-[#1a1a1a] text-white p-3 rounded-lg min-w-[160px] -m-3">
+            <Popup className="light-popup">
+              <div className="text-sm bg-white text-slate-800 p-3 rounded-lg min-w-[160px] -m-3 shadow-md border border-slate-100">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-lg">📹</span>
-                  <strong className="text-purple-400">{cam.name}</strong>
+                  <strong className="text-purple-600">{cam.name}</strong>
                 </div>
-                <div className="text-slate-400 text-xs space-y-1">
+                <div className="text-slate-500 text-xs space-y-1">
                   <div className="flex justify-between">
                     <span>Area</span>
-                    <span className="text-white">{cam.area}</span>
+                    <span className="text-slate-900">{cam.area}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Monitor</span>
-                    <span className="capitalize text-white">{cam.type}</span>
+                    <span className="capitalize text-slate-900">{cam.type}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Detections</span>
-                    <span className="text-orange-400 font-bold">{cam.totalDetections}</span>
+                    <span className="text-orange-600 font-bold">{cam.totalDetections}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Status</span>
-                    <span className={`font-bold ${cam.status === 'active' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className={`font-bold ${cam.status === 'active' ? 'text-emerald-600' : 'text-red-600'}`}>
                       {cam.status === 'active' ? '● Online' : '○ Offline'}
                     </span>
                   </div>
                 </div>
                 <button
                   onClick={() => onCameraClick?.(cam)}
-                  className="mt-3 w-full px-3 py-1.5 bg-purple-500/20 text-purple-400 text-xs rounded-lg hover:bg-purple-500/30 border border-purple-500/30 font-medium"
+                  className="mt-3 w-full px-3 py-1.5 bg-purple-50 text-purple-600 text-xs rounded-lg hover:bg-purple-100 border border-purple-200 font-medium transition-colors"
                 >
                   🔍 Analyze Video
                 </button>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { 
+import {
     Brain, Activity, AlertTriangle, TrendingUp, TrendingDown, Minus,
     Shield, RefreshCw, Zap, MapPin, Clock, Users, ChevronDown, ChevronUp,
     Sparkles, Target
@@ -126,76 +126,75 @@ export default function AICommandCenter({ incidents, predictions }: AICommandCen
 
     if (loading && !summary) {
         return (
-            <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6">
+            <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-xl">
-                        <Brain className="w-5 h-5 text-purple-400 animate-pulse" />
+                    <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+                        <Brain className="w-5 h-5 animate-pulse" />
                     </div>
-                    <h3 className="text-white font-bold">AI Command Center</h3>
+                    <h3 className="text-slate-900 font-bold">AI Command Center</h3>
                 </div>
                 <div className="flex items-center justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600"></div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
+        <div className="bg-white rounded-[2rem] border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
             {/* Header */}
-            <div className="p-4 border-b border-white/5 flex items-center justify-between">
+            <div className="p-5 border-b border-slate-50 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-xl">
-                        <Brain className="w-5 h-5 text-purple-400" />
+                    <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                        <Brain className="w-5 h-5" />
                     </div>
                     <div>
-                        <h3 className="text-white font-bold text-sm">AI Command Center</h3>
-                        <p className="text-[10px] text-slate-500">
+                        <h3 className="text-slate-900 font-bold text-sm">AI Command Center</h3>
+                        <p className="text-[10px] text-slate-400 font-medium uppercase tracking-wide">
                             {lastRefresh ? `Updated ${lastRefresh.toLocaleTimeString()}` : 'Analyzing...'}
                         </p>
                     </div>
                 </div>
-                <button 
+                <button
                     onClick={fetchSummary}
                     disabled={loading}
-                    className="p-2 hover:bg-white/5 rounded-lg transition-colors"
+                    className="p-2 hover:bg-slate-50 rounded-xl transition-colors text-slate-400 hover:text-indigo-600"
                 >
-                    <RefreshCw className={`w-4 h-4 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 </button>
             </div>
 
             {/* Health Score */}
             {summary && (
-                <div className={`p-4 bg-gradient-to-r ${getHealthBg(summary.health_score)} border-b border-white/5`}>
+                <div className={`p-5 bg-gradient-to-r ${getHealthBg(summary.health_score)} border-b border-slate-50`}>
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">City Health Score</p>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">City Health Score</p>
                             <div className="flex items-baseline gap-2 mt-1">
                                 <span className={`text-3xl font-black ${getHealthColor(summary.health_score)}`}>
                                     {summary.health_score}
                                 </span>
-                                <span className="text-sm text-slate-400">/100</span>
-                                <span className={`text-xs font-bold px-2 py-0.5 rounded ${getHealthColor(summary.health_score)} bg-white/5`}>
+                                <span className="text-sm text-slate-500 font-medium">/100</span>
+                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${getHealthColor(summary.health_score)} bg-white/60 backdrop-blur-sm border border-white/20 shadow-sm`}>
                                     {summary.health_label}
                                 </span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 bg-white/40 px-3 py-1.5 rounded-lg border border-white/20">
                             <TrendIcon direction={summary.trend?.direction || 'stable'} />
-                            <span className="text-xs text-slate-400">
+                            <span className="text-xs text-slate-600 font-bold">
                                 {summary.trend?.direction === 'increasing' ? '↑' : summary.trend?.direction === 'decreasing' ? '↓' : '→'}
                                 {Math.abs(summary.trend?.change_percent || 0)}%
                             </span>
                         </div>
                     </div>
-                    
+
                     {/* Health bar */}
-                    <div className="w-full bg-slate-700/50 h-1.5 rounded-full mt-3 overflow-hidden">
-                        <div 
-                            className={`h-full rounded-full transition-all duration-1000 ${
-                                summary.health_score >= 70 ? 'bg-emerald-500' : 
+                    <div className="w-full bg-slate-200/50 h-2 rounded-full mt-4 overflow-hidden">
+                        <div
+                            className={`h-full rounded-full transition-all duration-1000 ${summary.health_score >= 70 ? 'bg-emerald-500' :
                                 summary.health_score >= 40 ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}
+                                } shadow-[0_0_10px_rgba(0,0,0,0.1)]`}
                             style={{ width: `${summary.health_score}%` }}
                         />
                     </div>
@@ -204,60 +203,59 @@ export default function AICommandCenter({ incidents, predictions }: AICommandCen
 
             {/* Metrics Grid */}
             {summary?.metrics && (
-                <div className="grid grid-cols-4 divide-x divide-white/5 border-b border-white/5">
-                    <div className="p-3 text-center">
-                        <p className="text-lg font-black text-white">{summary.metrics.total_active}</p>
-                        <p className="text-[9px] text-slate-500 uppercase font-bold">Active</p>
+                <div className="grid grid-cols-4 divide-x divide-slate-50 border-b border-slate-50">
+                    <div className="p-4 text-center group hover:bg-slate-50/50 transition-colors">
+                        <p className="text-xl font-black text-slate-800 group-hover:text-indigo-600 transition-colors">{summary.metrics.total_active}</p>
+                        <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider mt-1">Active</p>
                     </div>
-                    <div className="p-3 text-center">
-                        <p className="text-lg font-black text-red-400">{summary.metrics.critical}</p>
-                        <p className="text-[9px] text-slate-500 uppercase font-bold">Critical</p>
+                    <div className="p-4 text-center group hover:bg-slate-50/50 transition-colors">
+                        <p className="text-xl font-black text-rose-500">{summary.metrics.critical}</p>
+                        <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider mt-1">Critical</p>
                     </div>
-                    <div className="p-3 text-center">
-                        <p className="text-lg font-black text-yellow-400">{summary.metrics.pending_review}</p>
-                        <p className="text-[9px] text-slate-500 uppercase font-bold">Pending</p>
+                    <div className="p-4 text-center group hover:bg-slate-50/50 transition-colors">
+                        <p className="text-xl font-black text-amber-500">{summary.metrics.pending_review}</p>
+                        <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider mt-1">Pending</p>
                     </div>
-                    <div className="p-3 text-center">
-                        <p className="text-lg font-black text-purple-400">{summary.metrics.predictions_active}</p>
-                        <p className="text-[9px] text-slate-500 uppercase font-bold">Predictions</p>
+                    <div className="p-4 text-center group hover:bg-slate-50/50 transition-colors">
+                        <p className="text-xl font-black text-violet-500">{summary.metrics.predictions_active}</p>
+                        <p className="text-[9px] text-slate-400 uppercase font-bold tracking-wider mt-1">Forecast</p>
                     </div>
                 </div>
             )}
 
             {/* AI Narrative */}
             {summary?.narrative && (
-                <div className="p-4 border-b border-white/5">
+                <div className="p-5 border-b border-slate-50 bg-slate-50/30">
                     <div className="flex items-center gap-2 mb-2">
-                        <Sparkles className="w-3 h-3 text-purple-400" />
-                        <p className="text-[10px] text-purple-400 uppercase tracking-wider font-bold">AI Analysis</p>
+                        <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+                        <p className="text-[10px] text-violet-600 uppercase tracking-wider font-bold">AI Analysis</p>
                     </div>
-                    <p className="text-xs text-slate-300 leading-relaxed">{summary.narrative}</p>
+                    <p className="text-xs text-slate-600 leading-relaxed font-medium">{summary.narrative}</p>
                 </div>
             )}
 
             {/* Hotspots */}
             {summary?.hotspot_areas && summary.hotspot_areas.length > 0 && (
-                <div className="p-4 border-b border-white/5">
-                    <button 
+                <div className="p-4 border-b border-slate-50">
+                    <button
                         onClick={() => setExpanded(expanded === 'hotspots' ? null : 'hotspots')}
-                        className="flex items-center justify-between w-full mb-2"
+                        className="flex items-center justify-between w-full mb-3 group"
                     >
                         <div className="flex items-center gap-2">
-                            <MapPin className="w-3 h-3 text-red-400" />
-                            <p className="text-[10px] text-red-400 uppercase tracking-wider font-bold">Hotspot Areas</p>
+                            <MapPin className="w-3.5 h-3.5 text-rose-500" />
+                            <p className="text-[10px] text-rose-600 uppercase tracking-wider font-bold group-hover:text-rose-700 transition-colors">Hotspot Areas</p>
                         </div>
-                        {expanded === 'hotspots' ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
+                        {expanded === 'hotspots' ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
                     </button>
                     {expanded === 'hotspots' && (
                         <div className="space-y-2">
                             {summary.hotspot_areas.map((h: any, i: number) => (
-                                <div key={i} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                                    <span className="text-xs text-white font-medium">{h.area}</span>
+                                <div key={i} className="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
+                                    <span className="text-xs text-slate-700 font-semibold">{h.area}</span>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-[10px] text-slate-400">{h.incidents} incidents</span>
-                                        <div className={`w-2 h-2 rounded-full ${
-                                            h.severity >= 0.7 ? 'bg-red-500' : h.severity >= 0.4 ? 'bg-yellow-500' : 'bg-green-500'
-                                        }`} />
+                                        <span className="text-[10px] text-slate-500 font-medium">{h.incidents} incidents</span>
+                                        <div className={`w-2 h-2 rounded-full ${h.severity >= 0.7 ? 'bg-rose-500' : h.severity >= 0.4 ? 'bg-amber-500' : 'bg-emerald-500'
+                                            } ring-2 ring-white shadow-sm`} />
                                     </div>
                                 </div>
                             ))}
@@ -268,26 +266,25 @@ export default function AICommandCenter({ incidents, predictions }: AICommandCen
 
             {/* Recommendations */}
             {summary?.recommendations && summary.recommendations.length > 0 && (
-                <div className="p-4 border-b border-white/5">
+                <div className="p-4 border-b border-slate-50">
                     <button
                         onClick={() => setExpanded(expanded === 'recs' ? null : 'recs')}
-                        className="flex items-center justify-between w-full mb-2"
+                        className="flex items-center justify-between w-full mb-3 group"
                     >
                         <div className="flex items-center gap-2">
-                            <Target className="w-3 h-3 text-cyan-400" />
-                            <p className="text-[10px] text-cyan-400 uppercase tracking-wider font-bold">AI Recommendations</p>
+                            <Target className="w-3.5 h-3.5 text-cyan-600" />
+                            <p className="text-[10px] text-cyan-600 uppercase tracking-wider font-bold group-hover:text-cyan-700 transition-colors">AI Recommendations</p>
                         </div>
-                        {expanded === 'recs' ? <ChevronUp className="w-3 h-3 text-slate-400" /> : <ChevronDown className="w-3 h-3 text-slate-400" />}
+                        {expanded === 'recs' ? <ChevronUp className="w-3.5 h-3.5 text-slate-400" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-400" />}
                     </button>
                     {expanded === 'recs' && (
                         <div className="space-y-2">
                             {summary.recommendations.map((rec: any, i: number) => (
-                                <div key={i} className={`p-2.5 rounded-lg border ${
-                                    rec.priority === 'high' ? 'bg-red-500/5 border-red-500/20' :
-                                    'bg-cyan-500/5 border-cyan-500/20'
-                                }`}>
-                                    <p className="text-xs text-white font-medium">{rec.action}</p>
-                                    <p className="text-[10px] text-slate-400 mt-0.5">{rec.reason}</p>
+                                <div key={i} className={`p-3 rounded-xl border ${rec.priority === 'high' ? 'bg-rose-50/50 border-rose-100' :
+                                    'bg-cyan-50/50 border-cyan-100'
+                                    }`}>
+                                    <p className="text-xs text-slate-800 font-semibold">{rec.action}</p>
+                                    <p className="text-[10px] text-slate-500 mt-1 font-medium">{rec.reason}</p>
                                 </div>
                             ))}
                         </div>
@@ -298,15 +295,15 @@ export default function AICommandCenter({ incidents, predictions }: AICommandCen
             {/* Anomalies */}
             {summary?.anomalies && summary.anomalies.length > 0 && (
                 <div className="p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <AlertTriangle className="w-3 h-3 text-amber-400" />
-                        <p className="text-[10px] text-amber-400 uppercase tracking-wider font-bold">Anomalies Detected</p>
+                    <div className="flex items-center gap-2 mb-3">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                        <p className="text-[10px] text-amber-600 uppercase tracking-wider font-bold">Anomalies Detected</p>
                     </div>
                     <div className="space-y-2">
                         {summary.anomalies.map((a: any, i: number) => (
-                            <div key={i} className="p-2.5 bg-amber-500/5 border border-amber-500/20 rounded-lg">
-                                <p className="text-xs text-amber-300 font-medium">{a.description}</p>
-                                <p className="text-[10px] text-slate-400 mt-0.5">💡 {a.recommendation}</p>
+                            <div key={i} className="p-3 bg-amber-50/50 border border-amber-100 rounded-xl">
+                                <p className="text-xs text-amber-900 font-semibold">{a.description}</p>
+                                <p className="text-[10px] text-slate-500 mt-1 font-medium">💡 {a.recommendation}</p>
                             </div>
                         ))}
                     </div>

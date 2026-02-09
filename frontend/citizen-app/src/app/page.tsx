@@ -30,7 +30,7 @@ const MapComponent = dynamic(() => import('../components/Map'), {
 export default function Home() {
   const { user } = useUser();
   const { isConnected: wsConnected, lastEvent } = useWebSocket();
-  
+
   const [selectedIssue, setSelectedIssue] = useState<string | null>(null);
   const [activeIncidents, setActiveIncidents] = useState<any[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -84,7 +84,7 @@ export default function Home() {
           fetchWeather(),
           fetchTrafficStatus()
         ]);
-        
+
         if (mounted) {
           setWeather(weatherData);
           setTrafficStatus(trafficData);
@@ -147,9 +147,9 @@ export default function Home() {
         break;
       case 'incident:vote':
         // Update specific incident vote count
-        setActiveIncidents(prev => 
-          prev.map(inc => 
-            inc.id === data.incidentId 
+        setActiveIncidents(prev =>
+          prev.map(inc =>
+            inc.id === data.incidentId
               ? { ...inc, verified: (inc.verified || 0) + 1 }
               : inc
           )
@@ -221,33 +221,32 @@ export default function Home() {
   }, [user]);
 
   return (
-    <main className="flex h-screen flex-col bg-[#0a0a0a] text-white overflow-hidden">
+    <main className="flex h-screen flex-col bg-slate-50 text-slate-900 overflow-hidden">
       {/* Header */}
-      <header className="flex items-center justify-between px-3 md:px-5 py-3 md:py-4 bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-white/5 z-10">
+      <header className="flex items-center justify-between px-3 md:px-5 py-3 md:py-4 bg-white/90 backdrop-blur-xl border-b border-slate-200 z-10 shadow-sm">
         <div className="flex items-center gap-2 md:gap-3">
-          <div className="h-8 w-8 md:h-10 md:w-10 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg md:rounded-xl flex items-center justify-center text-white font-bold text-base md:text-xl shadow-lg shadow-cyan-500/20">
+          <div className="h-8 w-8 md:h-10 md:w-10 bg-emerald-600 rounded-lg md:rounded-xl flex items-center justify-center text-white font-bold text-base md:text-xl shadow-lg shadow-emerald-600/20">
             P
           </div>
           <div>
-            <h1 className="text-base md:text-lg font-bold text-white leading-none">Public Pulse</h1>
+            <h1 className="text-base md:text-lg font-bold text-slate-900 leading-none">Public Pulse</h1>
             <p className="text-[10px] md:text-xs text-slate-500 font-medium">Vadodara Live</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 md:gap-2">
           {/* Sync Status Indicator */}
-          <div className={`flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs font-medium border ${
-            wsConnected && syncStatus.isOnline
-              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
-              : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-          }`}>
+          <div className={`flex items-center gap-1 md:gap-1.5 px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs font-medium border ${wsConnected && syncStatus.isOnline
+            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+            : 'bg-amber-50 border-amber-200 text-amber-700'
+            }`}>
             {wsConnected && syncStatus.isOnline ? <Wifi size={11} /> : <WifiOff size={11} />}
             <span className="hidden sm:inline">{wsConnected ? 'Live' : syncStatus.isOnline ? 'API' : 'Offline'}</span>
           </div>
-          <button className="p-2 md:p-2.5 bg-white/5 hover:bg-white/10 rounded-lg md:rounded-xl transition-colors border border-white/10">
-            <Search size={16} className="text-slate-400 md:w-[18px] md:h-[18px]" />
+          <button className="p-2 md:p-2.5 bg-slate-100 hover:bg-slate-200 rounded-lg md:rounded-xl transition-colors border border-slate-200 text-slate-600">
+            <Search size={16} className="md:w-[18px] md:h-[18px]" />
           </button>
-          <button className="p-2 md:p-2.5 bg-white/5 hover:bg-white/10 rounded-lg md:rounded-xl relative transition-colors border border-white/10">
-            <Bell size={16} className="text-slate-400 md:w-[18px] md:h-[18px]" />
+          <button className="p-2 md:p-2.5 bg-slate-100 hover:bg-slate-200 rounded-lg md:rounded-xl relative transition-colors border border-slate-200 text-slate-600">
+            <Bell size={16} className="md:w-[18px] md:h-[18px]" />
             <span className="absolute top-1 right-1 md:top-1.5 md:right-1.5 h-2 w-2 bg-red-500 rounded-full animate-pulse"></span>
           </button>
         </div>
@@ -266,12 +265,12 @@ export default function Home() {
         />
 
         {/* AI Narration Panel - Top Right (hidden on very small screens) */}
-        <div className="absolute top-4 right-4 z-[500] hidden sm:block">
+        <div className="absolute top-4 right-4 z-[500] hidden sm:block max-w-sm">
           <AINarrationPanel incidents={activeIncidents} />
         </div>
 
-        {/* AI Prediction Panel - Bottom Left (hidden on small mobile, shown on larger) */}
-        <div className="absolute bottom-36 md:bottom-44 left-2 md:left-4 z-[500] hidden sm:block">
+        {/* AI Prediction Panel - Bottom Left (Moved up to avoid overlap) */}
+        <div className="absolute bottom-40 md:bottom-44 left-2 md:left-4 z-[500] hidden md:block max-w-sm">
           <AIPredictionPanel
             incidents={activeIncidents}
             userLocation={userLocation}
@@ -279,31 +278,21 @@ export default function Home() {
           />
         </div>
 
-        {/* AI Chat Assistant - positioned above FABs */}
-        <div className="absolute bottom-[220px] md:bottom-[280px] right-2 md:right-4 z-[500]">
-          <AIChatAssistant incidents={activeIncidents} userLocation={userLocation} />
-        </div>
 
-        {/* Filter Bar - Dark Glass */}
-        <div className="absolute top-3 md:top-4 left-2 md:left-4 right-16 sm:right-auto z-[500] flex gap-1.5 md:gap-2 overflow-x-auto pb-2 no-scrollbar">
+
+        {/* Filter Bar - Light Glass */}
+        <div className="absolute top-3 md:top-4 left-2 md:left-4 right-16 sm:right-auto z-[500] flex gap-1.5 md:gap-2 overflow-x-auto pb-2 no-scrollbar max-w-[calc(100vw-100px)]">
           {['All', 'Traffic', 'Garbage', 'Water', 'Light'].map((filter) => {
             const isActive = selectedIssue === filter.toLowerCase() || (filter === 'All' && !selectedIssue);
-            const colors: Record<string, string> = {
-              All: 'from-cyan-500 to-blue-600',
-              Traffic: 'from-red-500 to-orange-500',
-              Garbage: 'from-orange-500 to-yellow-500',
-              Water: 'from-blue-500 to-cyan-500',
-              Light: 'from-yellow-500 to-amber-500'
-            };
+            const activeClass = isActive
+              ? 'bg-emerald-600 text-white shadow-md'
+              : 'bg-white/90 backdrop-blur-md text-slate-600 hover:bg-slate-50 border border-slate-200 shadow-sm';
+
             return (
               <button
                 key={filter}
                 onClick={() => setSelectedIssue(filter === 'All' ? null : filter.toLowerCase())}
-                className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all active:scale-95 ${
-                  isActive
-                    ? `bg-gradient-to-r ${colors[filter]} text-white shadow-lg`
-                    : 'bg-black/60 backdrop-blur-md text-slate-300 hover:bg-white/10 border border-white/10'
-                }`}
+                className={`px-3 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-xs md:text-sm font-semibold whitespace-nowrap transition-all active:scale-95 ${activeClass}`}
               >
                 {filter}
               </button>
@@ -312,54 +301,51 @@ export default function Home() {
         </div>
 
         {/* Bottom Info Card - Dynamic Status */}
-        <div className="absolute bottom-3 md:bottom-6 left-2 md:left-4 right-2 md:right-4 z-[500] bg-black/70 backdrop-blur-xl rounded-xl md:rounded-2xl p-3 md:p-4 border border-white/10">
+        <div className="absolute bottom-3 md:bottom-6 left-2 md:left-4 right-2 md:right-4 z-[500] bg-white/95 backdrop-blur-xl rounded-xl md:rounded-2xl p-3 md:p-4 border border-slate-200 shadow-lg">
           <div className="flex items-center justify-between mb-2 md:mb-3">
             <h3 className="text-[10px] md:text-xs font-bold text-slate-500 uppercase tracking-wider">
               Live Status
             </h3>
-            <span className="flex items-center gap-1.5 text-[10px] text-emerald-400">
+            <span className="flex items-center gap-1.5 text-[10px] text-emerald-600">
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
               {wsConnected ? 'Real-time' : 'Polling'}
             </span>
           </div>
           {isLoadingData ? (
             <div className="grid grid-cols-3 gap-2 md:gap-3">
-              {[1,2,3].map(i => (
-                <div key={i} className="bg-slate-800/50 border border-slate-700/20 p-2 md:p-3 rounded-lg md:rounded-xl h-14 md:h-16 animate-pulse" />
+              {[1, 2, 3].map(i => (
+                <div key={i} className="bg-slate-100 border border-slate-200 p-2 md:p-3 rounded-lg md:rounded-xl h-14 md:h-16 animate-pulse" />
               ))}
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2 md:gap-3">
-              <div className={`p-2 md:p-3 rounded-lg md:rounded-xl text-center ${
-                trafficStatus?.color === 'red' ? 'bg-red-500/10 border border-red-500/20' :
-                trafficStatus?.color === 'green' ? 'bg-emerald-500/10 border border-emerald-500/20' :
-                'bg-orange-500/10 border border-orange-500/20'
-              }`}>
-                <p className={`text-[9px] md:text-[10px] font-bold uppercase mb-0.5 ${
-                  trafficStatus?.color === 'red' ? 'text-red-400' :
-                  trafficStatus?.color === 'green' ? 'text-emerald-400' :
-                  'text-orange-400'
-                }`}>TRAFFIC</p>
-                <p className={`text-base md:text-lg font-black ${
-                  trafficStatus?.color === 'red' ? 'text-red-500' :
-                  trafficStatus?.color === 'green' ? 'text-emerald-500' :
-                  'text-orange-500'
-                }`}>{trafficStatus?.label || '...'}</p>
+              <div className={`p-2 md:p-3 rounded-lg md:rounded-xl text-center border ${trafficStatus?.color === 'red' ? 'bg-red-50 border-red-200' :
+                trafficStatus?.color === 'green' ? 'bg-emerald-50 border-emerald-200' :
+                  'bg-orange-50 border-orange-200'
+                }`}>
+                <p className={`text-[9px] md:text-[10px] font-bold uppercase mb-0.5 ${trafficStatus?.color === 'red' ? 'text-red-600' :
+                  trafficStatus?.color === 'green' ? 'text-emerald-600' :
+                    'text-orange-600'
+                  }`}>TRAFFIC</p>
+                <p className={`text-base md:text-lg font-black ${trafficStatus?.color === 'red' ? 'text-red-600' :
+                  trafficStatus?.color === 'green' ? 'text-emerald-600' :
+                    'text-orange-600'
+                  }`}>{trafficStatus?.label || '...'}</p>
               </div>
-              <div className="bg-blue-500/10 border border-blue-500/20 p-2 md:p-3 rounded-lg md:rounded-xl text-center">
-                <p className="text-[9px] md:text-[10px] text-blue-400 font-bold uppercase mb-0.5">RAIN</p>
-                <p className="text-base md:text-lg font-black text-blue-500">{weather ? `${Math.round(weather.rainProbability)}%` : '--'}</p>
+              <div className="bg-blue-50 border border-blue-200 p-2 md:p-3 rounded-lg md:rounded-xl text-center">
+                <p className="text-[9px] md:text-[10px] text-blue-600 font-bold uppercase mb-0.5">RAIN</p>
+                <p className="text-base md:text-lg font-black text-blue-600">{weather ? `${Math.round(weather.rainProbability)}%` : '--'}</p>
               </div>
-              <div className="bg-orange-500/10 border border-orange-500/20 p-2 md:p-3 rounded-lg md:rounded-xl text-center">
-                <p className="text-[9px] md:text-[10px] text-orange-400 font-bold uppercase mb-0.5">ISSUES</p>
-                <p className="text-base md:text-lg font-black text-orange-500">{activeIncidents.length}</p>
+              <div className="bg-orange-50 border border-orange-200 p-2 md:p-3 rounded-lg md:rounded-xl text-center">
+                <p className="text-[9px] md:text-[10px] text-orange-600 font-bold uppercase mb-0.5">ISSUES</p>
+                <p className="text-base md:text-lg font-black text-orange-600">{activeIncidents.length}</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Floating Action Buttons - responsive positioning */}
-        <div className="absolute bottom-[100px] md:bottom-52 right-2 md:right-4 z-[600] flex flex-col gap-2 md:gap-3">
+        <div className="absolute bottom-[160px] md:bottom-[180px] right-2 md:right-4 z-[600] flex flex-col gap-2 md:gap-3">
           {/* Report Issue FAB */}
           <button
             onClick={() => setQuickReportOpen(true)}
@@ -381,7 +367,7 @@ export default function Home() {
 
         {/* Success Toast */}
         {reportSubmitted && (
-          <div className="absolute bottom-[180px] md:bottom-60 left-1/2 -translate-x-1/2 z-[700] bg-emerald-500/90 backdrop-blur-md text-white px-4 md:px-5 py-2.5 md:py-3 rounded-xl shadow-lg flex items-center gap-2 border border-emerald-400/30 animate-slide-up">
+          <div className="absolute bottom-[240px] md:bottom-[260px] left-1/2 -translate-x-1/2 z-[700] bg-emerald-600 text-white px-4 md:px-5 py-2.5 md:py-3 rounded-xl shadow-lg flex items-center gap-2 animate-slide-up">
             <CheckCircle size={16} />
             <span className="text-xs md:text-sm font-semibold">Issue reported!</span>
           </div>
@@ -389,7 +375,7 @@ export default function Home() {
 
         {/* Error Toast */}
         {error && (
-          <div className="absolute bottom-[180px] md:bottom-60 left-1/2 -translate-x-1/2 z-[700] bg-red-500/90 backdrop-blur-md text-white px-4 md:px-5 py-2.5 md:py-3 rounded-xl shadow-lg flex items-center gap-2 border border-red-400/30 animate-slide-up max-w-[92%]">
+          <div className="absolute bottom-[240px] md:bottom-[260px] left-1/2 -translate-x-1/2 z-[700] bg-red-600 text-white px-4 md:px-5 py-2.5 md:py-3 rounded-xl shadow-lg flex items-center gap-2 animate-slide-up max-w-[92%]">
             <AlertCircle size={16} className="shrink-0" />
             <span className="text-xs md:text-sm font-semibold">{error}</span>
           </div>

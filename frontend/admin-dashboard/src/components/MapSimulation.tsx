@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { AlertTriangle, CheckCircle, Clock, MapPin, Search, Shield, Users, Wifi, XCircle, Check, X, Brain } from 'lucide-react';
 import { Incident } from '../services/groqAdminService';
 import AdminAIPanel from './AdminAIPanel';
-import AdminApprovalQueue from './AdminApprovalQueue';
+
 
 // Dynamic import for Leaflet map (client-side only)
 const LeafletMap = dynamic(() => import('./LeafletMap'), {
@@ -19,7 +19,7 @@ export default function MapSimulation() {
     const [incidents, setIncidents] = useState<Incident[]>([]);
     const [selectedIncident, setSelectedIncident] = useState<any>(null);
     const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-    const [showApprovalQueue, setShowApprovalQueue] = useState(true);
+
 
     useEffect(() => {
         setLastUpdate(new Date());
@@ -72,8 +72,8 @@ export default function MapSimulation() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'approve', adminId: 'admin' })
             });
-            setIncidents(prev => prev.map(inc => 
-                inc.id === incidentId 
+            setIncidents(prev => prev.map(inc =>
+                inc.id === incidentId
                     ? { ...inc, status: 'approved' as const, approvedAt: Date.now(), approvedBy: 'Admin' }
                     : inc
             ));
@@ -91,8 +91,8 @@ export default function MapSimulation() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'reject', adminId: 'admin' })
             });
-            setIncidents(prev => prev.map(inc => 
-                inc.id === incidentId 
+            setIncidents(prev => prev.map(inc =>
+                inc.id === incidentId
                     ? { ...inc, status: 'rejected' as const }
                     : inc
             ));
@@ -106,37 +106,18 @@ export default function MapSimulation() {
         setSelectedIncident(incident);
     }, []);
 
-    const handleSimulate = async (type: string) => {
-        setSimulating(true);
-        try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
-            await fetch(`${API_URL}/report`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    text: `Emergent ${type} cluster detected at Vadodara Central`,
-                    source: 'simulation_console',
-                    metadata: { simulated: true, urgent: true }
-                })
-            });
-            await fetchPredictions();
-        } catch (e) {
-            console.error(e);
-        } finally {
-            setSimulating(false);
-        }
-    };
+
 
     const pendingCount = incidents.filter(i => i.status === 'pending').length;
     const approvedCount = incidents.filter(i => i.status === 'approved').length;
 
     return (
-        <div className="h-full w-full flex flex-col relative bg-slate-900 overflow-hidden">
+        <div className="h-full w-full flex flex-col relative bg-slate-50 overflow-hidden">
             {/* AI Status Ticker */}
-            <div className="absolute top-4 left-4 z-[1000] bg-black/80 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 flex items-center gap-3">
+            <div className="absolute top-4 left-4 z-[1000] bg-white/90 backdrop-blur-md px-4 py-2 rounded-full border border-slate-200 shadow-sm flex items-center gap-3">
                 <span className="relative flex h-3 w-3">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                 </span>
                 <span className="text-xs text-green-400 font-mono tracking-wider">
                     AI ANALYZING VADODARA... UPDATED {lastUpdate ? lastUpdate.toLocaleTimeString() : '...'}
@@ -167,58 +148,9 @@ export default function MapSimulation() {
                     <AdminAIPanel incidents={incidents} />
                 </div>
 
-                {/* Simulation Control Panel */}
-                <div className="absolute top-4 right-4 bg-slate-900/90 backdrop-blur-md p-4 rounded-xl border border-white/10 shadow-2xl z-[999] w-48 transition-all hover:bg-slate-900">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                        <Wifi className="w-3 h-3 text-cyan-500 animate-pulse" /> Live Simulation
-                    </p>
-                    <div className="space-y-2">
-                        <button
-                            onClick={() => handleSimulate('Traffic')}
-                            disabled={simulating}
-                            className="text-xs bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-2 rounded-lg w-full hover:bg-red-500/20 transition-all font-bold flex items-center justify-center gap-2">
-                            {simulating && <span className="animate-spin">⟳</span>} Traffic Pulse
-                        </button>
-                        <button
-                            onClick={() => handleSimulate('Waterlog')}
-                            disabled={simulating}
-                            className="text-xs bg-cyan-500/10 text-cyan-500 border border-cyan-500/20 px-3 py-2 rounded-lg w-full hover:bg-cyan-500/20 transition-all font-bold flex items-center justify-center gap-2">
-                            {simulating && <span className="animate-spin">⟳</span>} Flood Ripple
-                        </button>
-                    </div>
-                    
-                    {/* Stats */}
-                    <div className="mt-4 pt-3 border-t border-white/10 grid grid-cols-2 gap-2 text-center">
-                        <div>
-                            <p className="text-lg font-bold text-yellow-400">{pendingCount}</p>
-                            <p className="text-[9px] text-slate-500 uppercase">Pending</p>
-                        </div>
-                        <div>
-                            <p className="text-lg font-bold text-green-400">{approvedCount}</p>
-                            <p className="text-[9px] text-slate-500 uppercase">Approved</p>
-                        </div>
-                    </div>
-                </div>
 
-                {/* Approval Queue Panel - Bottom */}
-                {showApprovalQueue && (
-                    <div className="absolute bottom-4 left-4 right-4 z-[1000] max-w-4xl mx-auto">
-                        <AdminApprovalQueue
-                            incidents={incidents}
-                            onApprove={handleApprove}
-                            onReject={handleReject}
-                            onViewOnMap={handleViewOnMap}
-                        />
-                    </div>
-                )}
 
-                {/* Toggle Approval Queue */}
-                <button
-                    onClick={() => setShowApprovalQueue(!showApprovalQueue)}
-                    className="absolute bottom-4 right-4 z-[1001] p-3 bg-slate-800 hover:bg-slate-700 rounded-xl border border-white/10 text-white transition-all"
-                >
-                    {showApprovalQueue ? <XCircle className="w-5 h-5" /> : <CheckCircle className="w-5 h-5" />}
-                </button>
+
 
                 {/* Incident Detail Slide-in Panel */}
                 <div className={`absolute top-0 right-0 h-full w-96 bg-slate-900/95 backdrop-blur-xl border-l border-white/10 shadow-2xl z-[1002] transform transition-transform duration-300 ease-in-out ${selectedIncident ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -233,19 +165,17 @@ export default function MapSimulation() {
 
                             <div className="mt-6">
                                 <div className="flex items-center gap-2 mb-2">
-                                    <span className={`px-2 py-0.5 text-xs font-bold rounded uppercase ${
-                                        (selectedIncident.probability || selectedIncident.severity) > 0.7 
-                                            ? 'bg-red-500/20 text-red-400' 
-                                            : 'bg-yellow-500/20 text-yellow-400'
-                                    }`}>
+                                    <span className={`px-2 py-0.5 text-xs font-bold rounded uppercase ${(selectedIncident.probability || selectedIncident.severity) > 0.7
+                                        ? 'bg-red-500/20 text-red-400'
+                                        : 'bg-yellow-500/20 text-yellow-400'
+                                        }`}>
                                         {selectedIncident.event_type}
                                     </span>
                                     {selectedIncident.status && (
-                                        <span className={`px-2 py-0.5 text-xs font-bold rounded uppercase ${
-                                            selectedIncident.status === 'approved' ? 'bg-green-500/20 text-green-400' :
+                                        <span className={`px-2 py-0.5 text-xs font-bold rounded uppercase ${selectedIncident.status === 'approved' ? 'bg-green-500/20 text-green-400' :
                                             selectedIncident.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' :
-                                            'bg-red-500/20 text-red-400'
-                                        }`}>
+                                                'bg-red-500/20 text-red-400'
+                                            }`}>
                                             {selectedIncident.status}
                                         </span>
                                     )}
@@ -264,7 +194,7 @@ export default function MapSimulation() {
                                 <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                                     <div className="flex justify-between items-center mb-2">
                                         <h4 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-                                            <Shield className="w-4 h-4 text-purple-400" /> 
+                                            <Shield className="w-4 h-4 text-purple-400" />
                                             {selectedIncident.probability ? 'AI Confidence' : 'Severity'}
                                         </h4>
                                         <span className="text-xl font-bold text-white">
@@ -272,8 +202,8 @@ export default function MapSimulation() {
                                         </span>
                                     </div>
                                     <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                                        <div 
-                                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500" 
+                                        <div
+                                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
                                             style={{ width: `${(selectedIncident.probability || selectedIncident.severity) * 100}%` }}
                                         ></div>
                                     </div>
@@ -314,7 +244,7 @@ export default function MapSimulation() {
                                     <div className="space-y-3">
                                         <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Admin Action Required</h4>
                                         <div className="flex gap-3">
-                                            <button 
+                                            <button
                                                 onClick={() => {
                                                     handleApprove(selectedIncident.id);
                                                     setSelectedIncident({ ...selectedIncident, status: 'approved' });
@@ -323,7 +253,7 @@ export default function MapSimulation() {
                                             >
                                                 <Check className="w-4 h-4" /> Approve
                                             </button>
-                                            <button 
+                                            <button
                                                 onClick={() => {
                                                     handleReject(selectedIncident.id);
                                                     setSelectedIncident({ ...selectedIncident, status: 'rejected' });
@@ -343,7 +273,7 @@ export default function MapSimulation() {
                                         <div className="relative">
                                             <div className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-green-500 border-2 border-slate-900"></div>
                                             <p className="text-xs text-slate-500">
-                                                {selectedIncident.createdAt 
+                                                {selectedIncident.createdAt
                                                     ? new Date(selectedIncident.createdAt).toLocaleTimeString()
                                                     : '10 mins ago'}
                                             </p>

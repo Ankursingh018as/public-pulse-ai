@@ -5,8 +5,8 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, RadialBarChart, RadialBar
 } from 'recharts';
-import { 
-    TrendingUp, TrendingDown, Activity, AlertTriangle, Clock, CheckCircle, 
+import {
+    TrendingUp, TrendingDown, Activity, AlertTriangle, Clock, CheckCircle,
     Zap, Shield, MapPin, Users, Eye, Target, Flame, Droplets, Trash2, Lightbulb,
     ArrowUpRight, ArrowDownRight, MoreHorizontal, RefreshCw, Download, Filter
 } from 'lucide-react';
@@ -138,7 +138,7 @@ export default function AnalyticsDashboard() {
             <div className="flex items-center justify-center h-96">
                 <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin"></div>
-                    <p className="text-slate-400 text-sm">Loading analytics...</p>
+                    <p className="text-slate-500 text-sm">Loading analytics...</p>
                 </div>
             </div>
         );
@@ -158,25 +158,24 @@ export default function AnalyticsDashboard() {
             {/* Header */}
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600">
+                    <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 shadow-md">
                             <Activity className="w-6 h-6 text-white" />
                         </div>
                         Analytics Dashboard
                     </h2>
-                    <p className="text-slate-400 text-sm mt-1">Real-time civic intelligence insights</p>
+                    <p className="text-slate-500 text-sm mt-1 font-medium">Real-time civic intelligence insights</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="flex bg-[#1a1a2e] rounded-xl p-1 border border-cyan-500/20">
+                    <div className="flex bg-white rounded-xl p-1 border border-slate-100 shadow-sm">
                         {['7d', '30d', '90d'].map(range => (
                             <button
                                 key={range}
                                 onClick={() => setTimeRange(range)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                                    timeRange === range
-                                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/25'
-                                        : 'text-slate-400 hover:text-white hover:bg-white/5'
-                                }`}
+                                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${timeRange === range
+                                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/25'
+                                        : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'
+                                    }`}
                             >
                                 {range === '7d' ? '7 Days' : range === '30d' ? '30 Days' : '90 Days'}
                             </button>
@@ -185,11 +184,11 @@ export default function AnalyticsDashboard() {
                     <button
                         onClick={fetchAnalytics}
                         disabled={refreshing}
-                        className="p-2.5 rounded-xl bg-[#1a1a2e] border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/10 transition-colors disabled:opacity-50"
+                        className="p-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-cyan-600 hover:bg-slate-50 transition-colors disabled:opacity-50 shadow-sm"
                     >
                         <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
                     </button>
-                    <button className="p-2.5 rounded-xl bg-[#1a1a2e] border border-cyan-500/20 text-slate-400 hover:text-white hover:bg-white/5 transition-colors">
+                    <button className="p-2.5 rounded-xl bg-white border border-slate-100 text-slate-400 hover:text-cyan-600 hover:bg-slate-50 transition-colors shadow-sm">
                         <Download className="w-5 h-5" />
                     </button>
                 </div>
@@ -234,24 +233,24 @@ export default function AnalyticsDashboard() {
             {/* Main Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Trend Chart - Larger */}
-                <div className="lg:col-span-2 bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-cyan-500/10 shadow-xl">
+                <div className="lg:col-span-2 bg-white p-4 md:p-6 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-center mb-6">
                         <div>
-                            <h4 className="font-bold text-white text-lg">Prediction & Incident Trends</h4>
-                            <p className="text-slate-500 text-xs mt-1">Tracking civic issues over time</p>
+                            <h4 className="font-bold text-slate-900 text-lg">Prediction & Incident Trends</h4>
+                            <p className="text-slate-500 text-xs mt-1 font-medium">Tracking civic issues over time</p>
                         </div>
-                        <div className="flex items-center gap-4 text-xs">
+                        <div className="flex items-center gap-4 text-xs font-bold">
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-cyan-500"></div>
-                                <span className="text-slate-400">Predictions</span>
+                                <div className="w-2.5 h-2.5 rounded-full bg-cyan-500"></div>
+                                <span className="text-slate-500">Predictions</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-rose-500"></div>
-                                <span className="text-slate-400">Incidents</span>
+                                <div className="w-2.5 h-2.5 rounded-full bg-rose-500"></div>
+                                <span className="text-slate-500">Incidents</span>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
-                                <span className="text-slate-400">Resolved</span>
+                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                                <span className="text-slate-500">Resolved</span>
                             </div>
                         </div>
                     </div>
@@ -271,9 +270,9 @@ export default function AnalyticsDashboard() {
                                     <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-                            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#334155' }} />
-                            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#334155' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" opacity={0.5} />
+                            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
+                            <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#cbd5e1' }} tickLine={false} />
                             <Tooltip content={<CustomTooltip />} />
                             <Area type="monotone" dataKey="predictions" stroke="#22d3ee" strokeWidth={2} fill="url(#gradientCyan)" />
                             <Area type="monotone" dataKey="incidents" stroke="#f43f5e" strokeWidth={2} fill="url(#gradientRose)" />
@@ -283,55 +282,55 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 {/* AI Performance Radial */}
-                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-6 rounded-2xl border border-purple-500/10 shadow-xl">
+                <div className="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-center mb-4">
                         <div>
-                            <h4 className="font-bold text-white text-lg">AI Performance</h4>
-                            <p className="text-slate-500 text-xs mt-1">Model accuracy metrics</p>
+                            <h4 className="font-bold text-slate-900 text-lg">AI Performance</h4>
+                            <p className="text-slate-500 text-xs mt-1 font-medium">Model accuracy metrics</p>
                         </div>
-                        <div className="p-2 rounded-lg bg-purple-500/10">
-                            <Target className="w-5 h-5 text-purple-400" />
+                        <div className="p-2 rounded-lg bg-purple-50 text-purple-600">
+                            <Target className="w-5 h-5" />
                         </div>
                     </div>
-                    
+
                     <div className="relative">
                         <ResponsiveContainer width="100%" height={200}>
-                            <RadialBarChart 
-                                cx="50%" 
-                                cy="50%" 
-                                innerRadius="60%" 
-                                outerRadius="90%" 
-                                data={radialData} 
-                                startAngle={180} 
+                            <RadialBarChart
+                                cx="50%"
+                                cy="50%"
+                                innerRadius="60%"
+                                outerRadius="90%"
+                                data={radialData}
+                                startAngle={180}
                                 endAngle={0}
                             >
                                 <RadialBar
-                                    background={{ fill: '#1e293b' }}
+                                    background={{ fill: '#f1f5f9' }}
                                     dataKey="value"
                                     cornerRadius={10}
                                 />
                             </RadialBarChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            <span className="text-4xl font-bold text-white">{stats?.aiAccuracy}%</span>
-                            <span className="text-xs text-slate-400">Accuracy</span>
+                            <span className="text-4xl font-black text-slate-900">{stats?.aiAccuracy}%</span>
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-wide">Accuracy</span>
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 mt-4">
-                        <div className="bg-[#0a0a1a] rounded-xl p-3 border border-cyan-500/10">
+                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
-                                <span className="text-xs text-slate-400">Precision</span>
+                                <span className="text-xs font-bold text-slate-500 uppercase">Precision</span>
                             </div>
-                            <span className="text-xl font-bold text-white">92%</span>
+                            <span className="text-xl font-bold text-slate-800">92%</span>
                         </div>
-                        <div className="bg-[#0a0a1a] rounded-xl p-3 border border-purple-500/10">
+                        <div className="bg-slate-50 rounded-xl p-3 border border-slate-100">
                             <div className="flex items-center gap-2 mb-1">
                                 <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                                <span className="text-xs text-slate-400">Recall</span>
+                                <span className="text-xs font-bold text-slate-500 uppercase">Recall</span>
                             </div>
-                            <span className="text-xl font-bold text-white">89%</span>
+                            <span className="text-xl font-bold text-slate-800">89%</span>
                         </div>
                     </div>
                 </div>
@@ -340,10 +339,10 @@ export default function AnalyticsDashboard() {
             {/* Bottom Row */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {/* Issue Type Distribution */}
-                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-cyan-500/10 shadow-xl">
+                <div className="bg-white p-4 md:p-6 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-center mb-4">
-                        <h4 className="font-bold text-white">Issue Types</h4>
-                        <span className="text-xs text-slate-500">{totalIncidents} total</span>
+                        <h4 className="font-bold text-slate-900">Issue Types</h4>
+                        <span className="text-xs font-bold text-slate-400">{totalIncidents} total</span>
                     </div>
                     <ResponsiveContainer width="100%" height={180}>
                         <PieChart>
@@ -357,7 +356,7 @@ export default function AnalyticsDashboard() {
                                 dataKey="value"
                             >
                                 {pieData.map((entry: any, index: number) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                    <Cell key={`cell-${index}`} fill={entry.fill} strokeWidth={2} stroke="#fff" />
                                 ))}
                             </Pie>
                             <Tooltip content={<PieTooltip />} />
@@ -365,22 +364,22 @@ export default function AnalyticsDashboard() {
                     </ResponsiveContainer>
                     <div className="space-y-2 mt-2">
                         {pieData.slice(0, 4).map((item: any, idx: number) => (
-                            <div key={idx} className="flex items-center justify-between text-xs">
+                            <div key={idx} className="flex items-center justify-between text-xs font-medium">
                                 <div className="flex items-center gap-2">
                                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.fill }}></div>
-                                    <span className="text-slate-400 capitalize">{item.name}</span>
+                                    <span className="text-slate-500 capitalize">{item.name}</span>
                                 </div>
-                                <span className="text-white font-medium">{item.value}</span>
+                                <span className="text-slate-800 font-bold">{item.value}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Risk Levels */}
-                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-rose-500/10 shadow-xl">
+                <div className="bg-white p-4 md:p-6 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-center mb-4">
-                        <h4 className="font-bold text-white">Risk Levels</h4>
-                        <Shield className="w-5 h-5 text-rose-400" />
+                        <h4 className="font-bold text-slate-900">Risk Levels</h4>
+                        <Shield className="w-5 h-5 text-rose-500" />
                     </div>
                     <div className="space-y-4">
                         <RiskBar label="Critical" value={stats?.highRisk || 0} max={50} color="rose" />
@@ -391,12 +390,12 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 {/* Alert Summary */}
-                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-amber-500/10 shadow-xl">
+                <div className="bg-white p-4 md:p-6 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-center mb-4">
-                        <h4 className="font-bold text-white">Alerts</h4>
+                        <h4 className="font-bold text-slate-900">Alerts</h4>
                         <div className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-                            <span className="text-xs text-amber-400">{stats?.alerts?.pending || 0} pending</span>
+                            <span className="text-xs font-bold text-amber-500">{stats?.alerts?.pending || 0} pending</span>
                         </div>
                     </div>
                     <div className="space-y-3">
@@ -408,40 +407,40 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 {/* Citizen Engagement */}
-                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-emerald-500/10 shadow-xl">
+                <div className="bg-white p-4 md:p-6 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex justify-between items-center mb-4">
-                        <h4 className="font-bold text-white">Citizen Engagement</h4>
-                        <Users className="w-5 h-5 text-emerald-400" />
+                        <h4 className="font-bold text-slate-900">Citizen Engagement</h4>
+                        <Users className="w-5 h-5 text-emerald-500" />
                     </div>
                     <div className="text-center py-4">
-                        <div className="text-5xl font-bold text-white mb-1">{stats?.citizenReports || 0}</div>
-                        <div className="text-sm text-slate-400">Reports this week</div>
-                        <div className="flex items-center justify-center gap-1 mt-2 text-emerald-400 text-sm">
-                            <ArrowUpRight className="w-4 h-4" />
-                            <span>+23% from last week</span>
+                        <div className="text-5xl font-black text-slate-900 mb-1 tracking-tight">{stats?.citizenReports || 0}</div>
+                        <div className="text-sm font-medium text-slate-500">Reports this week</div>
+                        <div className="flex items-center justify-center gap-1 mt-2 text-emerald-600 text-sm font-bold bg-emerald-50 py-1 px-2 rounded-full inline-flex mx-auto w-auto">
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                            <span>+23% vs last week</span>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mt-4">
-                        <div className="bg-[#0a0a1a] rounded-xl p-3 text-center border border-emerald-500/10">
-                            <div className="text-lg font-bold text-white">847</div>
-                            <div className="text-[10px] text-slate-500">Verifications</div>
+                        <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                            <div className="text-lg font-bold text-slate-900">847</div>
+                            <div className="text-[10px] uppercase font-bold text-slate-400">Verifications</div>
                         </div>
-                        <div className="bg-[#0a0a1a] rounded-xl p-3 text-center border border-cyan-500/10">
-                            <div className="text-lg font-bold text-white">92%</div>
-                            <div className="text-[10px] text-slate-500">Trust Score</div>
+                        <div className="bg-slate-50 rounded-xl p-3 text-center border border-slate-100">
+                            <div className="text-lg font-bold text-slate-900">92%</div>
+                            <div className="text-[10px] uppercase font-bold text-slate-400">Trust Score</div>
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Hot Zones Section */}
-            <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-6 rounded-2xl border border-rose-500/10 shadow-xl">
+            <div className="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h4 className="font-bold text-white text-lg">🔥 Active Hot Zones</h4>
-                        <p className="text-slate-500 text-xs mt-1">Areas requiring immediate attention</p>
+                        <h4 className="font-bold text-slate-900 text-lg">🔥 Active Hot Zones</h4>
+                        <p className="text-slate-500 text-xs mt-1 font-medium">Areas requiring immediate attention</p>
                     </div>
-                    <button className="px-4 py-2 rounded-xl bg-rose-500/10 text-rose-400 text-sm font-medium hover:bg-rose-500/20 transition-colors border border-rose-500/20">
+                    <button className="px-4 py-2 rounded-xl bg-rose-50 text-rose-600 text-sm font-bold hover:bg-rose-100 transition-colors border border-rose-100">
                         View All Zones
                     </button>
                 </div>
@@ -460,13 +459,13 @@ export default function AnalyticsDashboard() {
 function CustomTooltip({ active, payload, label }: any) {
     if (!active || !payload) return null;
     return (
-        <div className="bg-[#1a1a2e] border border-cyan-500/20 rounded-xl p-3 shadow-xl">
-            <p className="text-white font-medium mb-2">{label}</p>
+        <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xl text-slate-800">
+            <p className="text-slate-900 font-bold mb-2 text-sm">{label}</p>
             {payload.map((item: any, idx: number) => (
-                <div key={idx} className="flex items-center gap-2 text-sm">
+                <div key={idx} className="flex items-center gap-2 text-xs font-medium mt-1">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.stroke }}></div>
-                    <span className="text-slate-400 capitalize">{item.dataKey}:</span>
-                    <span className="text-white font-medium">{item.value}</span>
+                    <span className="text-slate-500 capitalize">{item.dataKey}:</span>
+                    <span className="text-slate-900 font-bold">{item.value}</span>
                 </div>
             ))}
         </div>
@@ -477,12 +476,12 @@ function PieTooltip({ active, payload }: any) {
     if (!active || !payload || !payload[0]) return null;
     const data = payload[0].payload;
     return (
-        <div className="bg-[#1a1a2e] border border-cyan-500/20 rounded-xl p-3 shadow-xl">
+        <div className="bg-white border border-slate-200 rounded-xl p-3 shadow-xl text-slate-800">
             <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: data.fill }}></div>
-                <span className="text-white font-medium capitalize">{data.name}</span>
+                <span className="text-slate-900 font-bold capitalize text-sm">{data.name}</span>
             </div>
-            <p className="text-slate-400 text-sm mt-1">{data.value} incidents</p>
+            <p className="text-slate-500 text-xs mt-1 font-medium">{data.value} incidents</p>
         </div>
     );
 }
@@ -496,34 +495,44 @@ function GlowCard({ title, value, change, icon, gradient, suffix }: any) {
         emerald: 'from-emerald-500 to-green-600',
         purple: 'from-purple-500 to-violet-600'
     };
-    
-    const glows: Record<string, string> = {
-        cyan: 'shadow-cyan-500/20',
-        rose: 'shadow-rose-500/20',
-        amber: 'shadow-amber-500/20',
-        emerald: 'shadow-emerald-500/20',
-        purple: 'shadow-purple-500/20'
+
+    const bgGlows: Record<string, string> = {
+        cyan: 'bg-cyan-50 group-hover:bg-cyan-100/50',
+        rose: 'bg-rose-50 group-hover:bg-rose-100/50',
+        amber: 'bg-amber-50 group-hover:bg-amber-100/50',
+        emerald: 'bg-emerald-50 group-hover:bg-emerald-100/50',
+        purple: 'bg-purple-50 group-hover:bg-purple-100/50'
     };
 
     const isPositive = change >= 0;
     const isGood = (gradient === 'emerald' || gradient === 'cyan') ? isPositive : !isPositive;
 
     return (
-        <div className={`bg-[#1a1a2e]/80 backdrop-blur-xl p-5 rounded-2xl border border-white/5 shadow-xl ${glows[gradient]} relative overflow-hidden group hover:scale-[1.02] transition-transform`}>
-            <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${gradients[gradient]} rounded-full opacity-10 blur-2xl group-hover:opacity-20 transition-opacity`}></div>
+        <div className={`bg-white p-5 rounded-[1.5rem] border border-slate-100 shadow-sm hover:shadow-md relative overflow-hidden group transition-all`}>
+            {/* Subtle corner glow */}
+            <div className={`absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br ${gradients[gradient]} rounded-full opacity-5 blur-3xl group-hover:opacity-10 transition-opacity`}></div>
+
             <div className="flex justify-between items-start relative z-10">
                 <div>
-                    <p className="text-sm text-slate-400 mb-1">{title}</p>
-                    <p className="text-3xl font-bold text-white">
+                    <p className="text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-1">{title}</p>
+                    <p className="text-3xl font-black text-slate-900 tracking-tight">
                         {value}{suffix}
                     </p>
                 </div>
-                <div className={`p-2.5 rounded-xl bg-gradient-to-br ${gradients[gradient]} shadow-lg`}>
-                    {icon}
+                <div className={`p-2.5 rounded-xl ${bgGlows[gradient]} transition-colors`}>
+                    {/* Clone icon to apply specific text color if needed, or rely on gradient prop */}
+                    <span className={
+                        gradient === 'cyan' ? 'text-cyan-600' :
+                            gradient === 'rose' ? 'text-rose-600' :
+                                gradient === 'amber' ? 'text-amber-600' :
+                                    gradient === 'emerald' ? 'text-emerald-600' : 'text-purple-600'
+                    }>
+                        {icon}
+                    </span>
                 </div>
             </div>
-            <div className={`flex items-center gap-1 mt-3 text-sm ${isGood ? 'text-emerald-400' : 'text-rose-400'}`}>
-                {isPositive ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
+            <div className={`flex items-center gap-1 mt-3 text-xs font-bold ${isGood ? 'text-emerald-600' : 'text-rose-600'} bg-slate-50 w-fit px-2 py-0.5 rounded-md`}>
+                {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                 <span>{Math.abs(change)}% vs last period</span>
             </div>
         </div>
@@ -539,21 +548,21 @@ function RiskBar({ label, value, max, color }: { label: string; value: number; m
         emerald: 'bg-emerald-500'
     };
     const bgColors: Record<string, string> = {
-        rose: 'bg-rose-500/10',
-        amber: 'bg-amber-500/10',
-        yellow: 'bg-yellow-500/10',
-        emerald: 'bg-emerald-500/10'
+        rose: 'bg-rose-50',
+        amber: 'bg-amber-50',
+        yellow: 'bg-yellow-50',
+        emerald: 'bg-emerald-50'
     };
     const percentage = Math.min((value / max) * 100, 100);
 
     return (
         <div>
             <div className="flex justify-between items-center mb-1.5">
-                <span className="text-xs text-slate-400">{label}</span>
-                <span className="text-xs font-bold text-white">{value}</span>
+                <span className="text-xs font-bold text-slate-500 uppercase">{label}</span>
+                <span className="text-xs font-bold text-slate-900">{value}</span>
             </div>
             <div className={`h-2 rounded-full ${bgColors[color]}`}>
-                <div 
+                <div
                     className={`h-full rounded-full ${colors[color]} transition-all duration-500`}
                     style={{ width: `${percentage}%` }}
                 ></div>
@@ -565,21 +574,21 @@ function RiskBar({ label, value, max, color }: { label: string; value: number; m
 // Alert Stat Component
 function AlertStat({ icon, label, value, color }: any) {
     const colors: Record<string, string> = {
-        rose: 'text-rose-400 bg-rose-500/10',
-        amber: 'text-amber-400 bg-amber-500/10',
-        blue: 'text-blue-400 bg-blue-500/10',
-        emerald: 'text-emerald-400 bg-emerald-500/10'
+        rose: 'text-rose-600 bg-rose-50',
+        amber: 'text-amber-600 bg-amber-50',
+        blue: 'text-blue-600 bg-blue-50',
+        emerald: 'text-emerald-600 bg-emerald-50'
     };
 
     return (
-        <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-                <div className={`p-1.5 rounded-lg ${colors[color]}`}>
+        <div className="flex items-center justify-between group hover:bg-slate-50 p-2 rounded-xl transition-colors -mx-2">
+            <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-lg ${colors[color]}`}>
                     {icon}
                 </div>
-                <span className="text-sm text-slate-400">{label}</span>
+                <span className="text-sm font-medium text-slate-600">{label}</span>
             </div>
-            <span className="text-lg font-bold text-white">{value}</span>
+            <span className="text-lg font-bold text-slate-900">{value}</span>
         </div>
     );
 }
@@ -592,27 +601,41 @@ function HotZoneCard({ zone, type, severity, reports }: { zone: string; type: st
         garbage: <Trash2 className="w-4 h-4" />,
         light: <Lightbulb className="w-4 h-4" />
     };
-    
-    const typeColors: Record<string, string> = {
-        traffic: 'from-rose-500 to-red-600 border-rose-500/30',
-        water: 'from-blue-500 to-cyan-600 border-blue-500/30',
-        garbage: 'from-orange-500 to-amber-600 border-orange-500/30',
-        light: 'from-yellow-500 to-amber-600 border-yellow-500/30'
+
+    // Using softer gradients for light mode but keeping them distinct
+    const typeStyles: Record<string, string> = {
+        traffic: 'bg-rose-50 border-rose-100 hover:border-rose-200',
+        water: 'bg-cyan-50 border-cyan-100 hover:border-cyan-200',
+        garbage: 'bg-amber-50 border-amber-100 hover:border-amber-200',
+        light: 'bg-yellow-50 border-yellow-100 hover:border-yellow-200'
+    };
+
+    const typeText: Record<string, string> = {
+        traffic: 'text-rose-700',
+        water: 'text-cyan-700',
+        garbage: 'text-amber-700',
+        light: 'text-yellow-700'
     };
 
     return (
-        <div className={`bg-gradient-to-br ${typeColors[type]} p-4 rounded-xl border relative overflow-hidden`}>
-            <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 rounded-full -mr-10 -mt-10"></div>
+        <div className={`${typeStyles[type]} p-4 rounded-2xl border transition-all hover:shadow-md group`}>
             <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 rounded-lg bg-white/20">
+                <div className={`p-2 rounded-xl bg-white shadow-sm ${typeText[type]}`}>
                     {typeIcons[type]}
                 </div>
-                <span className="text-xs font-medium text-white/70 uppercase">{type}</span>
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${typeText[type]}`}>{type}</span>
             </div>
-            <h5 className="font-bold text-white mb-1">{zone}</h5>
-            <div className="flex items-center justify-between text-sm">
-                <span className="text-white/70">{severity}% severity</span>
-                <span className="text-white/70">{reports} reports</span>
+            <h5 className="font-bold text-slate-900 mb-1">{zone}</h5>
+            <div className="flex items-center justify-between text-xs font-medium text-slate-500 mt-3">
+                <span>{severity}% severity</span>
+                <span>{reports} reports</span>
+            </div>
+            {/* Severity bar */}
+            <div className="w-full h-1 bg-white/50 rounded-full mt-2 overflow-hidden">
+                <div
+                    className={`h-full rounded-full ${type.replace('bg-', '') === 'traffic' ? 'bg-rose-500' : 'bg-cyan-500'}`}
+                    style={{ width: `${severity}%` }}
+                />
             </div>
         </div>
     );

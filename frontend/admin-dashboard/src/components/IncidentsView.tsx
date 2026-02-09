@@ -101,18 +101,18 @@ export default function IncidentsView() {
 
     const getStatusColor = (status?: string) => {
         switch (status) {
-            case 'approved': return 'bg-green-500/20 text-green-400 border-green-500/30';
-            case 'rejected': return 'bg-red-500/20 text-red-400 border-red-500/30';
-            case 'resolved': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+            case 'approved': return 'bg-green-50 text-green-700 border-green-200';
+            case 'rejected': return 'bg-red-50 text-red-700 border-red-200';
+            case 'resolved': return 'bg-blue-50 text-blue-700 border-blue-200';
             case 'pending':
-            default: return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+            default: return 'bg-amber-50 text-amber-700 border-amber-200';
         }
     };
 
     const getSeverityColor = (severity: number) => {
-        if (severity >= 0.7) return 'text-red-400 bg-red-500/20';
-        if (severity >= 0.4) return 'text-orange-400 bg-orange-500/20';
-        return 'text-yellow-400 bg-yellow-500/20';
+        if (severity >= 0.7) return 'text-rose-600 bg-rose-50';
+        if (severity >= 0.4) return 'text-orange-600 bg-orange-50';
+        return 'text-amber-600 bg-amber-50';
     };
 
     // Apply filters
@@ -140,21 +140,20 @@ export default function IncidentsView() {
     };
 
     return (
-        <div className="space-y-4 md:space-y-6 animate-fade-in">
+        <div className="space-y-4 md:space-y-6 animate-fade-in p-1">
             {/* Stats Row */}
             <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-4">
                 {(Object.keys(statusCounts) as Array<keyof typeof statusCounts>).map((key) => (
                     <button
                         key={key}
                         onClick={() => setFilter(key)}
-                        className={`p-2.5 md:p-4 rounded-xl border transition-all ${
-                            filter === key
-                                ? 'bg-white/10 border-cyan-500/40 shadow-lg shadow-cyan-500/10'
-                                : 'bg-white/5 border-white/10 hover:bg-white/10'
-                        }`}
+                        className={`p-2.5 md:p-4 rounded-[1.5rem] border transition-all ${filter === key
+                                ? 'bg-white border-cyan-500 shadow-lg shadow-cyan-500/10 ring-1 ring-cyan-500'
+                                : 'bg-white border-slate-100 hover:border-cyan-200 hover:shadow-md'
+                            }`}
                     >
-                        <p className="text-lg md:text-2xl font-bold text-white">{statusCounts[key]}</p>
-                        <p className="text-[10px] md:text-xs text-slate-400 uppercase font-semibold mt-0.5 md:mt-1">{key}</p>
+                        <p className="text-lg md:text-2xl font-black text-slate-800">{statusCounts[key]}</p>
+                        <p className="text-[10px] md:text-xs text-slate-500 uppercase font-bold mt-0.5 md:mt-1 tracking-wide">{key}</p>
                     </button>
                 ))}
             </div>
@@ -168,14 +167,14 @@ export default function IncidentsView() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search incidents..."
-                        className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/40"
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-sm transition-all"
                     />
                 </div>
                 <div className="flex items-center gap-2">
                     <select
                         value={typeFilter}
                         onChange={(e) => setTypeFilter(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-xl px-3 md:px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500/40 appearance-none cursor-pointer flex-1 sm:flex-initial"
+                        className="bg-white border border-slate-200 rounded-xl px-3 md:px-4 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 shadow-sm appearance-none cursor-pointer flex-1 sm:flex-initial transition-all font-medium"
                     >
                         <option value="all">All Types</option>
                         <option value="traffic">🚗 Traffic</option>
@@ -188,26 +187,26 @@ export default function IncidentsView() {
                     <button
                         onClick={fetchData}
                         disabled={loading}
-                        className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
+                        className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 hover:text-cyan-600 hover:border-cyan-200 transition-colors shadow-sm"
                     >
-                        <RefreshCw className={`w-4 h-4 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
+                        <RefreshCw className={`w-4 h-4 text-slate-500 ${loading ? 'animate-spin' : ''}`} />
                     </button>
                 </div>
             </div>
 
             {/* Incidents Table */}
-            <div className="bg-white/5 border border-white/10 rounded-xl md:rounded-2xl overflow-hidden backdrop-blur-md">
+            <div className="bg-white border border-slate-100 rounded-[1.5rem] overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                 {loading && incidents.length === 0 ? (
                     <div className="flex items-center justify-center py-16">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
                     </div>
                 ) : filteredIncidents.length === 0 ? (
-                    <div className="text-center py-16 text-slate-400">
-                        <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p>No incidents found</p>
+                    <div className="text-center py-16 text-slate-500">
+                        <AlertTriangle className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                        <p className="font-medium">No incidents found</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-slate-50">
                         {filteredIncidents.map(incident => {
                             const eventType = incident.event_type || incident.type || 'other';
                             const isProcessing = processingId === incident.id;
@@ -216,17 +215,17 @@ export default function IncidentsView() {
                             return (
                                 <div
                                     key={incident.id}
-                                    className={`p-3 md:p-4 flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 transition-all hover:bg-white/5 ${isProcessing ? 'opacity-50' : ''} ${isSelected ? 'bg-cyan-500/5' : ''}`}
+                                    className={`p-3 md:p-4 flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 transition-all hover:bg-slate-50 ${isProcessing ? 'opacity-50' : ''} ${isSelected ? 'bg-cyan-50/50' : ''}`}
                                 >
                                     {/* Top row: Icon + Info + Actions */}
                                     <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                                         {/* Type Icon */}
-                                        <div className="text-xl md:text-2xl w-8 md:w-10 text-center shrink-0">{getTypeIcon(eventType)}</div>
+                                        <div className="text-xl md:text-2xl w-8 md:w-10 text-center shrink-0 p-2 bg-slate-50 rounded-xl">{getTypeIcon(eventType)}</div>
 
                                         {/* Info */}
                                         <div className="flex-1 min-w-0">
                                             <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-1">
-                                                <span className="text-white font-semibold capitalize text-sm">{eventType}</span>
+                                                <span className="text-slate-900 font-bold capitalize text-sm">{eventType}</span>
                                                 <span className={`px-1.5 md:px-2 py-0.5 rounded text-[10px] font-bold ${getSeverityColor(incident.severity)}`}>
                                                     {Math.round(incident.severity * 100)}%
                                                 </span>
@@ -234,13 +233,13 @@ export default function IncidentsView() {
                                                     {(incident.status || 'pending').toUpperCase()}
                                                 </span>
                                             </div>
-                                            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-slate-400">
+                                            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-slate-500 font-medium">
                                                 <span className="flex items-center gap-1">
-                                                    <MapPin className="w-3 h-3 shrink-0" />
+                                                    <MapPin className="w-3 h-3 shrink-0 text-slate-400" />
                                                     <span className="truncate">{incident.lat?.toFixed(4)}, {incident.lng?.toFixed(4)}</span>
                                                 </span>
                                                 <span className="hidden sm:flex items-center gap-1">
-                                                    <Clock className="w-3 h-3 shrink-0" />
+                                                    <Clock className="w-3 h-3 shrink-0 text-slate-400" />
                                                     {incident.createdAt ? new Date(incident.createdAt).toLocaleString() : 'Unknown'}
                                                 </span>
                                             </div>
@@ -251,8 +250,8 @@ export default function IncidentsView() {
                                     <div className="flex items-center justify-between sm:justify-end gap-3 pl-11 sm:pl-0">
                                         {/* Verified Count */}
                                         <div className="text-center px-2 md:px-3">
-                                            <div className="text-base md:text-lg font-bold text-cyan-400">{incident.verified || 0}</div>
-                                            <div className="text-[10px] text-slate-500 uppercase">Verified</div>
+                                            <div className="text-base md:text-lg font-bold text-cyan-600">{incident.verified || 0}</div>
+                                            <div className="text-[10px] text-slate-400 uppercase font-bold">Verified</div>
                                         </div>
 
                                         {/* Actions */}
@@ -262,7 +261,7 @@ export default function IncidentsView() {
                                                     <button
                                                         onClick={() => handleApprove(incident.id)}
                                                         disabled={isProcessing}
-                                                        className="p-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all disabled:opacity-50"
+                                                        className="p-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border border-emerald-100 rounded-lg transition-all disabled:opacity-50 shadow-sm"
                                                         title="Approve"
                                                     >
                                                         <Check className="w-4 h-4" />
@@ -270,7 +269,7 @@ export default function IncidentsView() {
                                                     <button
                                                         onClick={() => handleReject(incident.id)}
                                                         disabled={isProcessing}
-                                                        className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all disabled:opacity-50"
+                                                        className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-100 rounded-lg transition-all disabled:opacity-50 shadow-sm"
                                                         title="Reject"
                                                     >
                                                         <X className="w-4 h-4" />
@@ -281,15 +280,16 @@ export default function IncidentsView() {
                                                 <button
                                                     onClick={() => handleResolve(incident.id)}
                                                     disabled={isProcessing}
-                                                    className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all disabled:opacity-50 text-xs font-semibold"
+                                                    className="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-100 rounded-lg transition-all disabled:opacity-50 text-xs font-bold flex items-center gap-1 shadow-sm"
                                                     title="Mark Resolved"
                                                 >
                                                     <CheckCircle className="w-4 h-4" />
+                                                    Resolve
                                                 </button>
                                             )}
                                             <button
                                                 onClick={() => setSelectedIncident(isSelected ? null : incident)}
-                                                className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-all"
+                                                className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-lg transition-all shadow-sm"
                                                 title="View Details"
                                             >
                                                 <Eye className="w-4 h-4" />
@@ -305,48 +305,72 @@ export default function IncidentsView() {
 
             {/* Detail Panel */}
             {selectedIncident && (
-                <div className="bg-white/5 border border-white/10 rounded-xl md:rounded-2xl p-4 md:p-6 backdrop-blur-md">
-                    <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-bold text-white">Incident Details</h3>
-                        <button
-                            onClick={() => setSelectedIncident(null)}
-                            className="text-slate-400 hover:text-white"
-                        >
-                            <XCircle className="w-5 h-5" />
-                        </button>
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm"
+                    onClick={() => setSelectedIncident(null)}
+                >
+                    <div className="bg-white rounded-[2rem] p-6 shadow-2xl max-w-2xl w-full mx-4 border border-slate-100" onClick={e => e.stopPropagation()}>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                                <div className="p-2 bg-cyan-50 rounded-xl text-cyan-600">
+                                    <AlertTriangle className="w-5 h-5" />
+                                </div>
+                                Incident Details
+                            </h3>
+                            <button
+                                onClick={() => setSelectedIncident(null)}
+                                className="p-2 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors"
+                            >
+                                <XCircle className="w-6 h-6" />
+                            </button>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wide mb-1">Type</p>
+                                <p className="text-slate-900 font-bold capitalize flex items-center gap-2">
+                                    {getTypeIcon(selectedIncident.event_type || selectedIncident.type || '')}
+                                    {selectedIncident.event_type || selectedIncident.type}
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wide mb-1">Severity</p>
+                                <p className="text-slate-900 font-bold">{Math.round(selectedIncident.severity * 100)}%</p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wide mb-1">Status</p>
+                                <p className={`text-sm font-bold capitalize inline-block px-2 py-0.5 rounded ${getStatusColor(selectedIncident.status)}`}>
+                                    {selectedIncident.status || 'pending'}
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 col-span-2">
+                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wide mb-1">Location</p>
+                                <p className="text-slate-900 font-medium flex items-center gap-1">
+                                    <MapPin className="w-4 h-4 text-slate-400" />
+                                    {selectedIncident.lat?.toFixed(6)}, {selectedIncident.lng?.toFixed(6)}
+                                </p>
+                            </div>
+                            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wide mb-1">Verifications</p>
+                                <p className="text-slate-900 font-bold">{selectedIncident.verified || 0}</p>
+                            </div>
+                        </div>
+
+                        {selectedIncident.description && (
+                            <div className="mt-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                <p className="text-xs text-slate-500 uppercase font-bold tracking-wide mb-2">Description</p>
+                                <p className="text-slate-700 text-sm leading-relaxed">{selectedIncident.description}</p>
+                            </div>
+                        )}
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                onClick={() => setSelectedIncident(null)}
+                                className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-xl transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
-                        <div>
-                            <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Type</p>
-                            <p className="text-white capitalize">{selectedIncident.event_type || selectedIncident.type}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Severity</p>
-                            <p className="text-white">{Math.round(selectedIncident.severity * 100)}%</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Status</p>
-                            <p className="text-white capitalize">{selectedIncident.status || 'pending'}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Location</p>
-                            <p className="text-white">{selectedIncident.lat?.toFixed(4)}, {selectedIncident.lng?.toFixed(4)}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Verifications</p>
-                            <p className="text-white">{selectedIncident.verified || 0}</p>
-                        </div>
-                        <div>
-                            <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Source</p>
-                            <p className="text-white">{selectedIncident.source || 'citizen'}</p>
-                        </div>
-                    </div>
-                    {selectedIncident.description && (
-                        <div className="mt-4">
-                            <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Description</p>
-                            <p className="text-slate-300 text-sm">{selectedIncident.description}</p>
-                        </div>
-                    )}
                 </div>
             )}
         </div>

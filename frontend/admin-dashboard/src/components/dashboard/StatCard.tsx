@@ -19,49 +19,49 @@ export default function StatCard({ label, value, icon: Icon, trend, trendUp, col
     };
 
     const textColors: Record<string, string> = {
-        blue: 'text-cyan-400',
-        red: 'text-rose-400',
-        purple: 'text-purple-400',
-        amber: 'text-amber-400',
-        green: 'text-emerald-400'
+        blue: 'text-blue-600',
+        red: 'text-red-600',
+        purple: 'text-purple-600',
+        amber: 'text-amber-600',
+        green: 'text-emerald-600'
     };
 
     const bgColors: Record<string, string> = {
-        blue: 'bg-blue-500/10',
-        red: 'bg-red-500/10',
-        purple: 'bg-purple-500/10',
-        amber: 'bg-amber-500/10',
-        green: 'bg-emerald-500/10'
+        blue: 'bg-blue-50',
+        red: 'bg-red-50',
+        purple: 'bg-purple-50',
+        amber: 'bg-amber-50',
+        green: 'bg-emerald-50'
     };
 
     return (
-        <div className="glass-card rounded-2xl p-6 relative overflow-hidden group">
-            {/* Background Glow */}
-            <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full blur-3xl opacity-20 group-hover:opacity-30 transition-opacity bg-gradient-to-br ${gradients[color]}`}></div>
+        <div className="glass-card rounded-[1.75rem] p-6 relative overflow-hidden group border border-slate-100">
+            {/* Background Glow - More subtle for light mode */}
+            <div className={`absolute -right-6 -top-6 w-24 h-24 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity bg-gradient-to-br ${gradients[color]}`}></div>
 
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-4 relative z-10">
                 <div>
-                    <p className="text-sm font-medium text-slate-400 tracking-wide">{label}</p>
-                    <h3 className="text-3xl font-bold text-white mt-1 tracking-tight text-glow">{value}</h3>
+                    <p className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
+                    <h3 className="text-3xl font-black text-slate-900 mt-1.5 tracking-tight group-hover:scale-105 transition-transform origin-left">{value}</h3>
                 </div>
                 {Icon && (
-                    <div className={`p-3 rounded-xl ${bgColors[color]} border border-white/5`}>
-                        <Icon className={`w-6 h-6 ${textColors[color]}`} />
+                    <div className={`p-3.5 rounded-2xl ${bgColors[color]} flex items-center justify-center shadow-sm group-hover:shadow-md transition-all`}>
+                        <Icon className={`w-6 h-6 ${textColors[color]}`} strokeWidth={2.5} />
                     </div>
                 )}
             </div>
 
             {trend && (
-                <div className="flex items-center gap-2 text-xs">
-                    <span className={`font-semibold ${trendUp ? 'text-green-400' : 'text-red-400'}`}>
+                <div className="flex items-center gap-2 text-xs relative z-10">
+                    <span className={`font-bold px-1.5 py-0.5 rounded-md ${trendUp ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
                         {trendUp ? '↑' : '↓'} {trend}
                     </span>
-                    <span className="text-slate-500">vs last hour</span>
+                    <span className="text-slate-400 font-medium tracking-wide">vs last hour</span>
                 </div>
             )}
 
             {/* Bottom Gradient Line */}
-            <div className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${gradients[color]} opacity-50`}></div>
+            <div className={`absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r ${gradients[color]} opacity-30 group-hover:opacity-60 transition-opacity`}></div>
         </div>
     );
 }
