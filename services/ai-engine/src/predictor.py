@@ -34,7 +34,8 @@ def predict_risk(area_id: int, db_conn) -> dict:
             "time_series_score": fusion_engine.get_time_series_prediction(area_id),
             "nlp_score": 0.4, # Default low, requires real message connection
             "anomaly_score": fusion_engine.get_anomaly_score(area_id),
-            "history_score": fusion_engine.get_history_score(area_id)
+            "history_score": fusion_engine.get_history_score(area_id),
+            "video_score": fusion_engine.get_video_score(area_id)
         }
         result = fusion_engine.calculate_risk(inputs)
         result["reasons"] = ["Routine monitoring", "Normal sensor activity"]

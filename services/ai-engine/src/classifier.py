@@ -2,8 +2,8 @@ import os
 import pickle
 import logging
 
-# Path to trained model - use absolute path for Windows compatibility
-MODEL_PATH = r"D:\pulse ai\services\ai-engine\models\classifier.pkl"
+# Path to trained model - use relative path for cross-platform compatibility
+MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "classifier.pkl")
 
 # Load model if exists
 model = None
