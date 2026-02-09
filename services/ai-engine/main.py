@@ -2,7 +2,7 @@ import os
 import logging
 from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -13,6 +13,8 @@ from pathlib import Path
 from src.preprocessor import clean_text, extract_entities
 from src.classifier import classify_issue
 from src.predictor import predict_risk
+from src.sentiment_analyzer import analyze_sentiment, analyze_batch
+from src.ai_summarizer import CityIntelligenceSummarizer
 from src.video_detector import (
     detect_image,
     detect_video,
@@ -29,7 +31,10 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ai-engine")
 
-app = FastAPI(title="Public Pulse AI Engine", version="2.0.0")
+app = FastAPI(title="Public Pulse AI Engine", version="3.0.0")
+
+# Initialize AI modules
+city_summarizer = CityIntelligenceSummarizer()
 
 # Ensure upload directory exists
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -64,6 +69,17 @@ class TextPayload(BaseModel):
 class PredictionRequest(BaseModel):
     area_id: int
     issue_type: str
+
+class SentimentRequest(BaseModel):
+    text: str
+
+class BatchSentimentRequest(BaseModel):
+    texts: List[str]
+
+class SummaryRequest(BaseModel):
+    incidents: List[dict]
+    predictions: List[dict] = []
+    period_hours: int = 24
 
 # ==========================================
 # ROUTES
@@ -345,4 +361,79 @@ async def resume_training_endpoint(
         return resume_training(checkpoint_path)
     except Exception as e:
         logger.error(f"Resume failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==========================================
+# AI SENTIMENT ANALYSIS ROUTES
+# ==========================================
+
+@app.post("/analyze/sentiment")
+async def analyze_sentiment_endpoint(req: SentimentRequest):
+    """
+    Analyze sentiment, urgency, and emotion of citizen report text.
+    Supports English, Hindi, and Gujarati (including transliteration).
+    """
+    try:
+        result = analyze_sentiment(req.text)
+        return {"success": True, "data": result}
+    except Exception as e:
+        logger.error(f"Sentiment analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/analyze/sentiment/batch")
+async def analyze_sentiment_batch_endpoint(req: BatchSentimentRequest):
+    """
+    Batch analyze multiple citizen reports for aggregate sentiment metrics.
+    Returns urgency distribution, dominant emotions, and trending phrases.
+    """
+    try:
+        if len(req.texts) > 100:
+            raise HTTPException(status_code=400, detail="Maximum 100 texts per batch")
+        result = analyze_batch(req.texts)
+        return {"success": True, "data": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Batch sentiment analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==========================================
+# AI CITY INTELLIGENCE ROUTES
+# ==========================================
+
+@app.post("/ai/summarize")
+async def generate_city_summary(req: SummaryRequest):
+    """
+    Generate AI-powered executive summary of city conditions.
+    Includes health score, anomaly detection, trend analysis,
+    and resource allocation recommendations.
+    """
+    try:
+        summary = city_summarizer.generate_executive_summary(
+            incidents=req.incidents,
+            predictions=req.predictions,
+            recent_hours=req.period_hours,
+        )
+        return {"success": True, "data": summary}
+    except Exception as e:
+        logger.error(f"Summary generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/ai/area-briefing")
+async def generate_area_briefing(area_name: str, req: SummaryRequest):
+    """
+    Generate a focused intelligence briefing for a specific area.
+    """
+    try:
+        briefing = city_summarizer.generate_area_briefing(
+            area_name=area_name,
+            incidents=req.incidents,
+        )
+        return {"success": True, "data": briefing}
+    except Exception as e:
+        logger.error(f"Area briefing error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

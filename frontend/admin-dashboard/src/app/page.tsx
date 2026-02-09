@@ -9,6 +9,7 @@ import StatCard from '../components/dashboard/StatCard';
 import PredictionCard from '../components/dashboard/PredictionCard';
 import HistoryView from '../components/HistoryView';
 import IncidentsView from '../components/IncidentsView';
+import AICommandCenter from '../components/AICommandCenter';
 import { useWebSocket } from '../hooks/useWebSocket';
 import adminDataService from '../services/adminDataService';
 
@@ -16,6 +17,7 @@ export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Live Monitor');
     const [stats, setStats] = useState({ issues: 0, predictions: 0 });
     const [predictions, setPredictions] = useState<any[]>([]);
+    const [incidents, setIncidents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [notifications, setNotifications] = useState<any[]>([]);
 
@@ -66,6 +68,7 @@ export default function Dashboard() {
                 if (incRes && incRes.ok) {
                     const incData = await incRes.json();
                     incidents = incData.data || [];
+                    setIncidents(incidents);
                 }
 
                 setStats({
@@ -159,25 +162,31 @@ export default function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* Live Predictions Feed */}
-                            <div className="col-span-4 flex flex-col gap-4 overflow-hidden">
-                                <div className="flex justify-between items-center mb-2">
-                                    <h3 className="text-lg font-bold text-white">Risk Forecast</h3>
-                                    <span className="text-xs text-slate-500">Real-time AI</span>
-                                </div>
+                            {/* Right Panel - AI Command Center + Predictions */}
+                            <div className="col-span-4 flex flex-col gap-4 overflow-y-auto pr-1 custom-scrollbar">
+                                {/* AI Command Center */}
+                                <AICommandCenter incidents={incidents} predictions={predictions} />
 
-                                <div className="space-y-4 overflow-y-auto pr-2 h-full pb-20 custom-scrollbar">
-                                    {loading ? (
-                                        <div className="flex items-center justify-center h-40">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
-                                        </div>
-                                    ) : predictions.length === 0 ? (
-                                        <p className="text-slate-500 text-center py-10">No active risks detected.</p>
-                                    ) : (
-                                        predictions.map((pred: any, i: number) => (
-                                            <PredictionCard key={i} prediction={pred} />
-                                        ))
-                                    )}
+                                {/* Risk Forecast */}
+                                <div>
+                                    <div className="flex justify-between items-center mb-3">
+                                        <h3 className="text-sm font-bold text-white">Risk Forecast</h3>
+                                        <span className="text-xs text-slate-500">Real-time AI</span>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        {loading ? (
+                                            <div className="flex items-center justify-center h-20">
+                                                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-cyan-500"></div>
+                                            </div>
+                                        ) : predictions.length === 0 ? (
+                                            <p className="text-slate-500 text-center py-6 text-sm">No active risks detected.</p>
+                                        ) : (
+                                            predictions.slice(0, 5).map((pred: any, i: number) => (
+                                                <PredictionCard key={i} prediction={pred} />
+                                            ))
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

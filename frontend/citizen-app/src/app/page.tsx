@@ -8,6 +8,7 @@ import AINarrationPanel from '../components/AINarrationPanel';
 import AIPredictionPanel from '../components/AIPredictionPanel';
 import ReportIssueModal from '../components/ReportIssueModal';
 import VideoReportModal from '../components/VideoReportModal';
+import AIChatAssistant from '../components/AIChatAssistant';
 import dataService from '../services/dataService';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useUser } from '../context/UserContext';
@@ -270,6 +271,11 @@ export default function Home() {
             userLocation={userLocation}
             onPredictionSelect={(pred) => setVerifyingPrediction(pred)}
           />
+        </div>
+
+        {/* AI Chat Assistant - Bottom Right above FABs */}
+        <div className="absolute bottom-72 right-4 z-[500]">
+          <AIChatAssistant incidents={activeIncidents} userLocation={userLocation} />
         </div>
 
         {/* Filter Bar - Dark Glass */}

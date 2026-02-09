@@ -8,6 +8,7 @@ import { analyticsRouter } from './analytics.routes';
 import { verificationRouter } from './verification.routes';
 import { historyRouter } from './history.routes';
 import { videoRouter } from './video.routes';
+import { aiRouter } from './ai.routes';
 
 export const router = Router();
 
@@ -20,6 +21,7 @@ router.use('/analytics', analyticsRouter);
 router.use('/verify', verificationRouter);
 router.use('/history', historyRouter);
 router.use('/video', videoRouter);
+router.use('/ai', aiRouter);
 
 // Admin routes (mounted under /admin as well for clarity)
 router.patch('/admin/incidents/:id', incidentRouter);
