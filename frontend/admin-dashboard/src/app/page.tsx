@@ -8,6 +8,7 @@ import Sidebar from '../components/Sidebar';
 import StatCard from '../components/dashboard/StatCard';
 import PredictionCard from '../components/dashboard/PredictionCard';
 import HistoryView from '../components/HistoryView';
+import IncidentsView from '../components/IncidentsView';
 import { useWebSocket } from '../hooks/useWebSocket';
 import adminDataService from '../services/adminDataService';
 
@@ -192,9 +193,10 @@ export default function Dashboard() {
                 {activeTab === 'Alerts' && <AlertsView />}
                 {activeTab === 'Analytics' && <AnalyticsDashboard />}
                 {activeTab === 'History' && <HistoryView />}
+                {activeTab === 'Incidents' && <IncidentsView />}
 
                 {/* Fallback for other tabs */}
-                {(activeTab !== 'Live Monitor' && activeTab !== 'Map Simulation' && activeTab !== 'Alerts' && activeTab !== 'Analytics' && activeTab !== 'History') && (
+                {(activeTab !== 'Live Monitor' && activeTab !== 'Map Simulation' && activeTab !== 'Alerts' && activeTab !== 'Analytics' && activeTab !== 'History' && activeTab !== 'Incidents') && (
                     <div className="flex items-center justify-center h-[60vh] text-slate-500 flex-col gap-4">
                         <Activity className="w-16 h-16 opacity-20" />
                         <p>Module Under Development</p>

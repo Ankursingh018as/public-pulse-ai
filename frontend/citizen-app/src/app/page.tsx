@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Bell, Search, Plus, CheckCircle, Wifi, WifiOff, AlertCircle } from 'lucide-react';
+import { Bell, Search, Plus, CheckCircle, Wifi, WifiOff, AlertCircle, Camera } from 'lucide-react';
 import VerificationModal from '../components/VerificationModal';
 import AINarrationPanel from '../components/AINarrationPanel';
 import AIPredictionPanel from '../components/AIPredictionPanel';
 import ReportIssueModal from '../components/ReportIssueModal';
+import VideoReportModal from '../components/VideoReportModal';
 import dataService from '../services/dataService';
 import { useWebSocket } from '../hooks/useWebSocket';
 import { useUser } from '../context/UserContext';
@@ -33,6 +34,7 @@ export default function Home() {
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [quickReportOpen, setQuickReportOpen] = useState(false);
+  const [videoReportOpen, setVideoReportOpen] = useState(false);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [verifyingPrediction, setVerifyingPrediction] = useState<any>(null);
   const [syncStatus, setSyncStatus] = useState({ isOnline: true, pendingCount: 0, lastSync: 0 });
@@ -353,6 +355,15 @@ export default function Home() {
           <Plus size={26} strokeWidth={2.5} />
         </button>
 
+        {/* Floating AI Trash Detection FAB */}
+        <button
+          onClick={() => setVideoReportOpen(true)}
+          className="absolute bottom-52 right-20 z-[600] h-14 w-14 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+          title="AI Trash Detection"
+        >
+          <Camera size={24} strokeWidth={2.5} />
+        </button>
+
         {/* Success Toast */}
         {reportSubmitted && (
           <div className="absolute bottom-60 left-1/2 -translate-x-1/2 z-[700] bg-emerald-500/90 backdrop-blur-md text-white px-5 py-3 rounded-xl shadow-lg flex items-center gap-2 border border-emerald-400/30 animate-slide-up">
@@ -384,6 +395,13 @@ export default function Home() {
         position={userLocation}
         onClose={() => setQuickReportOpen(false)}
         onSubmit={handleReportSubmit}
+      />
+
+      {/* Video Trash Detection Modal */}
+      <VideoReportModal
+        open={videoReportOpen}
+        onClose={() => setVideoReportOpen(false)}
+        position={userLocation}
       />
 
       {/* Verification Modal */}

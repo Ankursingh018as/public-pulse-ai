@@ -7,7 +7,7 @@ const incidentSchema = new mongoose.Schema({
     event_type: {
         type: String,
         required: true,
-        enum: ['pothole', 'water_leak', 'garbage', 'streetlight', 'traffic', 'flood', 'other']
+        enum: ['pothole', 'water_leak', 'garbage', 'streetlight', 'traffic', 'flood', 'water', 'light', 'road', 'noise', 'other']
     },
     lat: {
         type: Number,
