@@ -140,27 +140,27 @@ export default function IncidentsView() {
     };
 
     return (
-        <div className="space-y-6 animate-fade-in">
+        <div className="space-y-4 md:space-y-6 animate-fade-in">
             {/* Stats Row */}
-            <div className="grid grid-cols-5 gap-4">
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 md:gap-4">
                 {(Object.keys(statusCounts) as Array<keyof typeof statusCounts>).map((key) => (
                     <button
                         key={key}
                         onClick={() => setFilter(key)}
-                        className={`p-4 rounded-xl border transition-all ${
+                        className={`p-2.5 md:p-4 rounded-xl border transition-all ${
                             filter === key
                                 ? 'bg-white/10 border-cyan-500/40 shadow-lg shadow-cyan-500/10'
                                 : 'bg-white/5 border-white/10 hover:bg-white/10'
                         }`}
                     >
-                        <p className="text-2xl font-bold text-white">{statusCounts[key]}</p>
-                        <p className="text-xs text-slate-400 uppercase font-semibold mt-1">{key}</p>
+                        <p className="text-lg md:text-2xl font-bold text-white">{statusCounts[key]}</p>
+                        <p className="text-[10px] md:text-xs text-slate-400 uppercase font-semibold mt-0.5 md:mt-1">{key}</p>
                     </button>
                 ))}
             </div>
 
             {/* Filters Row */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 md:gap-4">
                 <div className="relative flex-1">
                     <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                     <input
@@ -171,30 +171,32 @@ export default function IncidentsView() {
                         className="w-full bg-white/5 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500/40"
                     />
                 </div>
-                <select
-                    value={typeFilter}
-                    onChange={(e) => setTypeFilter(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500/40 appearance-none cursor-pointer"
-                >
-                    <option value="all">All Types</option>
-                    <option value="traffic">🚗 Traffic</option>
-                    <option value="garbage">🗑️ Garbage</option>
-                    <option value="water">💧 Water</option>
-                    <option value="light">💡 Light</option>
-                    <option value="road">🛣️ Road</option>
-                    <option value="noise">🔊 Noise</option>
-                </select>
-                <button
-                    onClick={fetchData}
-                    disabled={loading}
-                    className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
-                >
-                    <RefreshCw className={`w-4 h-4 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
-                </button>
+                <div className="flex items-center gap-2">
+                    <select
+                        value={typeFilter}
+                        onChange={(e) => setTypeFilter(e.target.value)}
+                        className="bg-white/5 border border-white/10 rounded-xl px-3 md:px-4 py-2.5 text-sm text-white focus:outline-none focus:border-cyan-500/40 appearance-none cursor-pointer flex-1 sm:flex-initial"
+                    >
+                        <option value="all">All Types</option>
+                        <option value="traffic">🚗 Traffic</option>
+                        <option value="garbage">🗑️ Garbage</option>
+                        <option value="water">💧 Water</option>
+                        <option value="light">💡 Light</option>
+                        <option value="road">🛣️ Road</option>
+                        <option value="noise">🔊 Noise</option>
+                    </select>
+                    <button
+                        onClick={fetchData}
+                        disabled={loading}
+                        className="p-2.5 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors"
+                    >
+                        <RefreshCw className={`w-4 h-4 text-slate-400 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
+                </div>
             </div>
 
             {/* Incidents Table */}
-            <div className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md">
+            <div className="bg-white/5 border border-white/10 rounded-xl md:rounded-2xl overflow-hidden backdrop-blur-md">
                 {loading && incidents.length === 0 ? (
                     <div className="flex items-center justify-center py-16">
                         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
@@ -214,84 +216,85 @@ export default function IncidentsView() {
                             return (
                                 <div
                                     key={incident.id}
-                                    className={`p-4 flex items-center gap-4 transition-all hover:bg-white/5 ${isProcessing ? 'opacity-50' : ''} ${isSelected ? 'bg-cyan-500/5' : ''}`}
+                                    className={`p-3 md:p-4 flex flex-col sm:flex-row sm:items-center gap-3 md:gap-4 transition-all hover:bg-white/5 ${isProcessing ? 'opacity-50' : ''} ${isSelected ? 'bg-cyan-500/5' : ''}`}
                                 >
-                                    {/* Type Icon */}
-                                    <div className="text-2xl w-10 text-center">{getTypeIcon(eventType)}</div>
+                                    {/* Top row: Icon + Info + Actions */}
+                                    <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                                        {/* Type Icon */}
+                                        <div className="text-xl md:text-2xl w-8 md:w-10 text-center shrink-0">{getTypeIcon(eventType)}</div>
 
-                                    {/* Info */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <span className="text-white font-semibold capitalize">{eventType}</span>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${getSeverityColor(incident.severity)}`}>
-                                                {Math.round(incident.severity * 100)}%
-                                            </span>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${getStatusColor(incident.status)}`}>
-                                                {(incident.status || 'pending').toUpperCase()}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-4 text-xs text-slate-400">
-                                            <span className="flex items-center gap-1">
-                                                <MapPin className="w-3 h-3" />
-                                                {incident.lat?.toFixed(4)}, {incident.lng?.toFixed(4)}
-                                            </span>
-                                            {incident.description && (
-                                                <span className="truncate max-w-[200px] text-slate-500 italic">
-                                                    &quot;{incident.description}&quot;
+                                        {/* Info */}
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex flex-wrap items-center gap-1.5 md:gap-2 mb-1">
+                                                <span className="text-white font-semibold capitalize text-sm">{eventType}</span>
+                                                <span className={`px-1.5 md:px-2 py-0.5 rounded text-[10px] font-bold ${getSeverityColor(incident.severity)}`}>
+                                                    {Math.round(incident.severity * 100)}%
                                                 </span>
-                                            )}
-                                            <span className="flex items-center gap-1">
-                                                <Clock className="w-3 h-3" />
-                                                {incident.createdAt ? new Date(incident.createdAt).toLocaleString() : 'Unknown'}
-                                            </span>
+                                                <span className={`px-1.5 md:px-2 py-0.5 rounded text-[10px] font-bold border ${getStatusColor(incident.status)}`}>
+                                                    {(incident.status || 'pending').toUpperCase()}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-xs text-slate-400">
+                                                <span className="flex items-center gap-1">
+                                                    <MapPin className="w-3 h-3 shrink-0" />
+                                                    <span className="truncate">{incident.lat?.toFixed(4)}, {incident.lng?.toFixed(4)}</span>
+                                                </span>
+                                                <span className="hidden sm:flex items-center gap-1">
+                                                    <Clock className="w-3 h-3 shrink-0" />
+                                                    {incident.createdAt ? new Date(incident.createdAt).toLocaleString() : 'Unknown'}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Verified Count */}
-                                    <div className="text-center px-3">
-                                        <div className="text-lg font-bold text-cyan-400">{incident.verified || 0}</div>
-                                        <div className="text-[10px] text-slate-500 uppercase">Verified</div>
-                                    </div>
+                                    {/* Bottom row on mobile: Verified + Actions */}
+                                    <div className="flex items-center justify-between sm:justify-end gap-3 pl-11 sm:pl-0">
+                                        {/* Verified Count */}
+                                        <div className="text-center px-2 md:px-3">
+                                            <div className="text-base md:text-lg font-bold text-cyan-400">{incident.verified || 0}</div>
+                                            <div className="text-[10px] text-slate-500 uppercase">Verified</div>
+                                        </div>
 
-                                    {/* Actions */}
-                                    <div className="flex items-center gap-2">
-                                        {(incident.status === 'pending' || !incident.status) && (
-                                            <>
+                                        {/* Actions */}
+                                        <div className="flex items-center gap-1.5 md:gap-2">
+                                            {(incident.status === 'pending' || !incident.status) && (
+                                                <>
+                                                    <button
+                                                        onClick={() => handleApprove(incident.id)}
+                                                        disabled={isProcessing}
+                                                        className="p-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all disabled:opacity-50"
+                                                        title="Approve"
+                                                    >
+                                                        <Check className="w-4 h-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleReject(incident.id)}
+                                                        disabled={isProcessing}
+                                                        className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all disabled:opacity-50"
+                                                        title="Reject"
+                                                    >
+                                                        <X className="w-4 h-4" />
+                                                    </button>
+                                                </>
+                                            )}
+                                            {incident.status === 'approved' && (
                                                 <button
-                                                    onClick={() => handleApprove(incident.id)}
+                                                    onClick={() => handleResolve(incident.id)}
                                                     disabled={isProcessing}
-                                                    className="p-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 rounded-lg transition-all disabled:opacity-50"
-                                                    title="Approve"
+                                                    className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all disabled:opacity-50 text-xs font-semibold"
+                                                    title="Mark Resolved"
                                                 >
-                                                    <Check className="w-4 h-4" />
+                                                    <CheckCircle className="w-4 h-4" />
                                                 </button>
-                                                <button
-                                                    onClick={() => handleReject(incident.id)}
-                                                    disabled={isProcessing}
-                                                    className="p-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg transition-all disabled:opacity-50"
-                                                    title="Reject"
-                                                >
-                                                    <X className="w-4 h-4" />
-                                                </button>
-                                            </>
-                                        )}
-                                        {incident.status === 'approved' && (
+                                            )}
                                             <button
-                                                onClick={() => handleResolve(incident.id)}
-                                                disabled={isProcessing}
-                                                className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-all disabled:opacity-50 text-xs font-semibold"
-                                                title="Mark Resolved"
+                                                onClick={() => setSelectedIncident(isSelected ? null : incident)}
+                                                className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-all"
+                                                title="View Details"
                                             >
-                                                <CheckCircle className="w-4 h-4" />
+                                                <Eye className="w-4 h-4" />
                                             </button>
-                                        )}
-                                        <button
-                                            onClick={() => setSelectedIncident(isSelected ? null : incident)}
-                                            className="p-2 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg transition-all"
-                                            title="View Details"
-                                        >
-                                            <Eye className="w-4 h-4" />
-                                        </button>
+                                        </div>
                                     </div>
                                 </div>
                             );
@@ -302,7 +305,7 @@ export default function IncidentsView() {
 
             {/* Detail Panel */}
             {selectedIncident && (
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-md">
+                <div className="bg-white/5 border border-white/10 rounded-xl md:rounded-2xl p-4 md:p-6 backdrop-blur-md">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg font-bold text-white">Incident Details</h3>
                         <button
@@ -312,7 +315,7 @@ export default function IncidentsView() {
                             <XCircle className="w-5 h-5" />
                         </button>
                     </div>
-                    <div className="grid grid-cols-3 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
                         <div>
                             <p className="text-xs text-slate-400 uppercase font-semibold mb-1">Type</p>
                             <p className="text-white capitalize">{selectedIncident.event_type || selectedIncident.type}</p>

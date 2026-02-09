@@ -196,7 +196,7 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* KPI Cards - Row 1 */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                 <GlowCard
                     title="Active Predictions"
                     value={stats?.totalPredictions || 0}
@@ -232,9 +232,9 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Main Charts Row */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {/* Trend Chart - Larger */}
-                <div className="col-span-2 bg-[#1a1a2e]/80 backdrop-blur-xl p-6 rounded-2xl border border-cyan-500/10 shadow-xl">
+                <div className="lg:col-span-2 bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-cyan-500/10 shadow-xl">
                     <div className="flex justify-between items-center mb-6">
                         <div>
                             <h4 className="font-bold text-white text-lg">Prediction & Incident Trends</h4>
@@ -338,9 +338,9 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Bottom Row */}
-            <div className="grid grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {/* Issue Type Distribution */}
-                <div className="col-span-1 bg-[#1a1a2e]/80 backdrop-blur-xl p-6 rounded-2xl border border-cyan-500/10 shadow-xl">
+                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-cyan-500/10 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="font-bold text-white">Issue Types</h4>
                         <span className="text-xs text-slate-500">{totalIncidents} total</span>
@@ -377,7 +377,7 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 {/* Risk Levels */}
-                <div className="col-span-1 bg-[#1a1a2e]/80 backdrop-blur-xl p-6 rounded-2xl border border-rose-500/10 shadow-xl">
+                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-rose-500/10 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="font-bold text-white">Risk Levels</h4>
                         <Shield className="w-5 h-5 text-rose-400" />
@@ -391,7 +391,7 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 {/* Alert Summary */}
-                <div className="col-span-1 bg-[#1a1a2e]/80 backdrop-blur-xl p-6 rounded-2xl border border-amber-500/10 shadow-xl">
+                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-amber-500/10 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="font-bold text-white">Alerts</h4>
                         <div className="flex items-center gap-1.5">
@@ -408,7 +408,7 @@ export default function AnalyticsDashboard() {
                 </div>
 
                 {/* Citizen Engagement */}
-                <div className="col-span-1 bg-[#1a1a2e]/80 backdrop-blur-xl p-6 rounded-2xl border border-emerald-500/10 shadow-xl">
+                <div className="bg-[#1a1a2e]/80 backdrop-blur-xl p-4 md:p-6 rounded-2xl border border-emerald-500/10 shadow-xl">
                     <div className="flex justify-between items-center mb-4">
                         <h4 className="font-bold text-white">Citizen Engagement</h4>
                         <Users className="w-5 h-5 text-emerald-400" />
@@ -445,7 +445,7 @@ export default function AnalyticsDashboard() {
                         View All Zones
                     </button>
                 </div>
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                     <HotZoneCard zone="Alkapuri Circle" type="traffic" severity={92} reports={18} />
                     <HotZoneCard zone="Sayajigunj" type="water" severity={78} reports={12} />
                     <HotZoneCard zone="Gotri Road" type="garbage" severity={65} reports={9} />

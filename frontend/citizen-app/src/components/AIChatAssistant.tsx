@@ -221,7 +221,7 @@ export default function AIChatAssistant({ incidents, userLocation }: AIChatAssis
     }
 
     return (
-        <div className="bg-[#0d0d1a]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-cyan-500/20 w-80 max-h-[480px] flex flex-col overflow-hidden">
+        <div className="bg-[#0d0d1a]/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-cyan-500/20 w-[calc(100vw-2rem)] sm:w-80 max-h-[60vh] sm:max-h-[480px] flex flex-col overflow-hidden">
             {/* Header */}
             <div className="bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-3 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2 text-white">
