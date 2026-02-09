@@ -13,6 +13,7 @@ interface AICommandCenterProps {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+const SUMMARY_REFRESH_INTERVAL_MS = 60000; // Refresh AI summary every 60 seconds
 
 export default function AICommandCenter({ incidents, predictions }: AICommandCenterProps) {
     const [summary, setSummary] = useState<any>(null);
@@ -90,7 +91,7 @@ export default function AICommandCenter({ incidents, predictions }: AICommandCen
 
     useEffect(() => {
         fetchSummary();
-        const interval = setInterval(fetchSummary, 60000);
+        const interval = setInterval(fetchSummary, SUMMARY_REFRESH_INTERVAL_MS);
         return () => clearInterval(interval);
     }, [fetchSummary]);
 

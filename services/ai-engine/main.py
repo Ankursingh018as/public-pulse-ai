@@ -31,7 +31,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ai-engine")
 
-app = FastAPI(title="Public Pulse AI Engine", version="3.0.0")
+app = FastAPI(title="Public Pulse AI Engine", version="2.1.0")
 
 # Initialize AI modules
 city_summarizer = CityIntelligenceSummarizer()

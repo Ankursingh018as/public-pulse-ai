@@ -90,6 +90,9 @@ function detectIntent(text: string): { intent: string; area?: string } {
     return { intent: 'help' };
 }
 
+// ~2km proximity threshold (in degrees latitude/longitude, approximate at Vadodara's latitude)
+const NEARBY_THRESHOLD_DEGREES = 0.02;
+
 export default function AIChatAssistant({ incidents, userLocation }: AIChatAssistantProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([
@@ -119,7 +122,7 @@ export default function AIChatAssistant({ incidents, userLocation }: AIChatAssis
             const lat = i.lat || i.location?.lat;
             const lng = i.lng || i.location?.lng;
             if (!lat || !lng) return false;
-            return Math.abs(lat - userLocation.lat) < 0.02 && Math.abs(lng - userLocation.lng) < 0.02;
+            return Math.abs(lat - userLocation.lat) < NEARBY_THRESHOLD_DEGREES && Math.abs(lng - userLocation.lng) < NEARBY_THRESHOLD_DEGREES;
         });
     }, [incidents, userLocation]);
 
