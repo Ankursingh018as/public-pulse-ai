@@ -1,10 +1,8 @@
 import os
 import logging
-import shutil
-import tempfile
 from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Optional
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -338,8 +336,13 @@ async def resume_training_endpoint(
         except Exception as e:
             logger.error(f"Resume failed: {e}")
 
-    if background_tasks:
+    if background_tasks is not None:
         background_tasks.add_task(_run_resume)
         return {"status": "resume_started", "checkpoint": checkpoint_path}
 
-    return resume_training(checkpoint_path)
+    # Synchronous fallback if no background tasks available
+    try:
+        return resume_training(checkpoint_path)
+    except Exception as e:
+        logger.error(f"Resume failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

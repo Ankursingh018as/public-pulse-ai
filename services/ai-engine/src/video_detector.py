@@ -18,6 +18,7 @@ _device = None
 
 SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 SUPPORTED_VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv"}
+TRASH_CLASS_NAMES = {"trash", "garbage", "waste", "litter"}
 
 # Default paths
 MODEL_DIR = Path(os.getenv("MODEL_DIR", "/app/models"))
@@ -130,7 +131,7 @@ def detect_image(
     trash_count = sum(
         1
         for d in detections
-        if d["class"].lower() in ("trash", "garbage", "waste", "litter")
+        if d["class"].lower() in TRASH_CLASS_NAMES
     )
 
     return {
@@ -255,7 +256,7 @@ def detect_video(
     trash_count = sum(
         1
         for d in all_detections
-        if d["class"].lower() in ("trash", "garbage", "waste", "litter")
+        if d["class"].lower() in TRASH_CLASS_NAMES
     )
 
     return {

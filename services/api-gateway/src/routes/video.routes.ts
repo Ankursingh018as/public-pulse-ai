@@ -6,6 +6,15 @@ export const videoRouter = Router();
 
 const AI_ENGINE_URL = process.env.AI_ENGINE_URL || 'http://localhost:8000';
 
+// Default location fallback (Vadodara city center)
+const DEFAULT_LAT = 22.3072;
+const DEFAULT_LNG = 73.1812;
+
+// Severity calculation constants
+const IMAGE_SEVERITY_MULTIPLIER = 2;
+const VIDEO_SEVERITY_DIVISOR = 5;
+const MAX_SEVERITY = 10;
+
 // POST /api/v1/video/detect/image - Upload image for trash detection
 videoRouter.post('/detect/image', async (req, res) => {
     try {
@@ -39,11 +48,11 @@ videoRouter.post('/detect/image', async (req, res) => {
             const incident = new Incident({
                 event_type: 'garbage',
                 description: `AI detected ${detectionResult.trash_count} trash item(s) via image analysis (confidence threshold: ${detectionResult.confidence_threshold})`,
-                lat: parseFloat(req.body?.lat) || 22.3072,
-                lng: parseFloat(req.body?.lng) || 73.1812,
+                lat: parseFloat(req.body?.lat) || DEFAULT_LAT,
+                lng: parseFloat(req.body?.lng) || DEFAULT_LNG,
                 source: 'video_detection',
                 reported_by: req.body?.reported_by || 'ai_system',
-                severity: Math.min(detectionResult.trash_count * 2, 10),
+                severity: Math.min(detectionResult.trash_count * IMAGE_SEVERITY_MULTIPLIER, MAX_SEVERITY),
                 confidence: detectionResult.detections?.[0]?.confidence || 0.5,
                 status: 'pending',
                 zone: req.body?.zone || 'zone_1',
@@ -114,11 +123,11 @@ videoRouter.post('/detect/video', async (req, res) => {
             const incident = new Incident({
                 event_type: 'garbage',
                 description: `AI detected ${detectionResult.trash_count} trash detection(s) across ${detectionResult.processing?.frames_processed || 0} video frames`,
-                lat: parseFloat(req.body?.lat) || 22.3072,
-                lng: parseFloat(req.body?.lng) || 73.1812,
+                lat: parseFloat(req.body?.lat) || DEFAULT_LAT,
+                lng: parseFloat(req.body?.lng) || DEFAULT_LNG,
                 source: 'video_detection',
                 reported_by: req.body?.reported_by || 'ai_system',
-                severity: Math.min(Math.ceil(detectionResult.trash_count / 5), 10),
+                severity: Math.min(Math.ceil(detectionResult.trash_count / VIDEO_SEVERITY_DIVISOR), MAX_SEVERITY),
                 confidence: 0.8,
                 status: 'pending',
                 zone: req.body?.zone || 'zone_1',
