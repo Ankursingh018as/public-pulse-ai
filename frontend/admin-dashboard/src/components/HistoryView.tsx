@@ -128,7 +128,7 @@ export default function HistoryView({ onSelectIncident }: HistoryViewProps) {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Stats Row */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <div className="bg-white/5 backdrop-blur-md rounded-2xl p-4 border border-white/10">
           <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Total Records</p>
           <p className="text-2xl font-bold text-white">{stats.total}</p>

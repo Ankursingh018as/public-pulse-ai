@@ -97,6 +97,9 @@ services:
       - POSTGRES_HOST=postgres
       - REDIS_HOST=redis
       - MONGO_URI=mongodb://mongodb:27017/pulse_raw
+      - MODEL_DIR=/app/models
+      - UPLOAD_DIR=/app/uploads
+      - DATA_DIR=/app/data
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,6 +108,8 @@ services:
     volumes:
       - ./services/ai-engine:/app
       - ./models:/app/models
+      - ai_uploads:/app/uploads
+      - ai_data:/app/data
 
   # ===========================================
   # DATA ACQUISITION SERVICES
@@ -214,6 +219,8 @@ volumes:
   postgres_data:
   redis_data:
   mongo_data:
+  ai_uploads:
+  ai_data:
 
 networks:
   default:

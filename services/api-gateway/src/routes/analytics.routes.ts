@@ -182,3 +182,94 @@ analyticsRouter.get('/hot-zones', async (req, res) => {
     }
 });
 
+// GET /api/v1/analytics/by-type - Incident breakdown by type
+analyticsRouter.get('/by-type', async (req, res) => {
+    try {
+        const typeBreakdown = await Incident.aggregate([
+            { $match: { resolved: false } },
+            {
+                $group: {
+                    _id: '$event_type',
+                    count: { $sum: 1 },
+                    avgSeverity: { $avg: '$severity' },
+                    critical: { $sum: { $cond: [{ $gte: ['$severity', 8] }, 1, 0] } }
+                }
+            },
+            { $sort: { count: -1 } }
+        ]);
+
+        res.json({
+            success: true,
+            data: typeBreakdown.map(t => ({
+                type: t._id,
+                count: t.count,
+                avg_severity: Math.round((t.avgSeverity || 0) * 10) / 10,
+                critical: t.critical
+            }))
+        });
+    } catch (err) {
+        console.error('Error fetching type breakdown:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch type breakdown' });
+    }
+});
+
+// GET /api/v1/analytics/performance - System performance metrics
+analyticsRouter.get('/performance', async (req, res) => {
+    try {
+        const now = new Date();
+        const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+        const last7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+        const [
+            totalIncidents24h,
+            resolvedIncidents24h,
+            avgResolutionTime,
+            citizenReports,
+            verifiedIncidents
+        ] = await Promise.all([
+            Incident.countDocuments({ createdAt: { $gte: last24h } }),
+            Incident.countDocuments({ resolved: true, resolved_at: { $gte: last24h } }),
+            Incident.aggregate([
+                { $match: { resolved: true, resolved_at: { $gte: last7d } } },
+                {
+                    $project: {
+                        resolutionMinutes: {
+                            $divide: [
+                                { $subtract: ['$resolved_at', '$createdAt'] },
+                                60000
+                            ]
+                        }
+                    }
+                },
+                { $group: { _id: null, avg: { $avg: '$resolutionMinutes' } } }
+            ]),
+            Incident.countDocuments({ source: 'citizen', createdAt: { $gte: last7d } }),
+            Incident.countDocuments({ verified_count: { $gte: 2 }, createdAt: { $gte: last7d } })
+        ]);
+
+        const resolutionRate = totalIncidents24h > 0 
+            ? Math.round((resolvedIncidents24h / totalIncidents24h) * 100) 
+            : 0;
+
+        res.json({
+            success: true,
+            data: {
+                incidents_24h: totalIncidents24h,
+                resolved_24h: resolvedIncidents24h,
+                resolution_rate: resolutionRate,
+                avg_resolution_minutes: Math.round(avgResolutionTime[0]?.avg || 0),
+                citizen_reports_7d: citizenReports,
+                verified_incidents_7d: verifiedIncidents,
+                // Placeholder values - in production, these would come from
+                // a model evaluation pipeline and infrastructure monitoring service
+                ai_accuracy: 87,
+                system_uptime: 99.2,
+                timestamp: now
+            }
+        });
+    } catch (err) {
+        console.error('Error fetching performance metrics:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch performance metrics' });
+    }
+});
+

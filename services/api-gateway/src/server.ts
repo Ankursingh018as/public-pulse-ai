@@ -31,8 +31,8 @@ app.use(cors({
 }));
 
 app.use(morgan('dev'));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // ===========================================
 // ROUTES
@@ -50,13 +50,20 @@ app.get('/health', (req, res) => {
 app.get('/api', (req, res) => {
     res.json({
         message: 'Public Pulse AI API Gateway',
-        version: '1.0.0',
+        version: '2.0.0',
         endpoints: {
             incidents: '/api/v1/incidents',
             analytics: '/api/v1/analytics',
             predictions: '/api/v1/predictions',
             areas: '/api/v1/areas',
-            alerts: '/api/v1/alerts'
+            alerts: '/api/v1/alerts',
+            video: {
+                detect_image: '/api/v1/video/detect/image',
+                detect_video: '/api/v1/video/detect/video',
+                model_status: '/api/v1/video/model/status',
+                model_reload: '/api/v1/video/model/reload',
+                train_start: '/api/v1/video/train/start',
+            }
         }
     });
 });

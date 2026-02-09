@@ -292,10 +292,53 @@ button:not(.no-transition), a:not(.no-transition) {
   transition: all 0.2s ease;
 }
 
+/* Touch-friendly sizing for mobile */
+@media (max-width: 640px) {
+  button, a, input, select {
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  /* Ensure minimum touch target size on mobile */
+  button:not(.compact-btn) {
+    min-height: 36px;
+    min-width: 36px;
+  }
+}
+
+/* Smooth content transitions for tab/panel switches */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Safe area padding for notched phones */
+@supports (padding: max(0px)) {
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+  }
+}
+
+/* Momentum scrolling on touch devices */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 /* Enhanced scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
 }
 
 ::-webkit-scrollbar-track {

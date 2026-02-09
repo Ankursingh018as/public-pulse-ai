@@ -1,17 +1,28 @@
 import os
 import logging
-from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import Optional, List
 from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import redis
 import json
+from pathlib import Path
 
 from src.preprocessor import clean_text, extract_entities
 from src.classifier import classify_issue
 from src.predictor import predict_risk
+from src.sentiment_analyzer import analyze_sentiment, analyze_batch
+from src.ai_summarizer import CityIntelligenceSummarizer
+from src.video_detector import (
+    detect_image,
+    detect_video,
+    get_model_status,
+    reload_model,
+    UPLOAD_DIR,
+)
+from src.video_training import train_model, resume_training, prepare_dataset
 
 # Load environment variables
 load_dotenv()
@@ -20,7 +31,13 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ai-engine")
 
-app = FastAPI(title="Public Pulse AI Engine", version="1.0.0")
+app = FastAPI(title="Public Pulse AI Engine", version="2.1.0")
+
+# Initialize AI modules
+city_summarizer = CityIntelligenceSummarizer()
+
+# Ensure upload directory exists
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Database connections
 try:
@@ -52,6 +69,17 @@ class TextPayload(BaseModel):
 class PredictionRequest(BaseModel):
     area_id: int
     issue_type: str
+
+class SentimentRequest(BaseModel):
+    text: str
+
+class BatchSentimentRequest(BaseModel):
+    texts: List[str]
+
+class SummaryRequest(BaseModel):
+    incidents: List[dict]
+    predictions: List[dict] = []
+    period_hours: int = 24
 
 # ==========================================
 # ROUTES
@@ -181,3 +209,231 @@ def save_and_predict(result: dict, payload: TextPayload):
     except Exception as e:
         logger.error(f"DB Save Error: {e}")
         pg_conn.rollback()
+
+
+# ==========================================
+# VIDEO / IMAGE DETECTION ROUTES
+# ==========================================
+
+class TrainRequest(BaseModel):
+    data_yaml: Optional[str] = None
+    epochs: int = 50
+    image_size: int = 640
+    batch_size: int = 16
+    base_model: str = "yolov8n.pt"
+
+
+@app.post("/detect/image")
+async def detect_image_endpoint(
+    file: UploadFile = File(...),
+    confidence: float = Form(default=0.5),
+):
+    """
+    Upload an image and run YOLO trash detection.
+    Returns bounding boxes, class labels, and confidence scores.
+    """
+    suffix = Path(file.filename or "upload.jpg").suffix.lower()
+    if suffix not in {".jpg", ".jpeg", ".png", ".bmp", ".webp"}:
+        raise HTTPException(status_code=400, detail=f"Unsupported image format: {suffix}")
+
+    tmp_path = UPLOAD_DIR / f"img_{os.urandom(8).hex()}{suffix}"
+    try:
+        with open(tmp_path, "wb") as f:
+            content = await file.read()
+            f.write(content)
+
+        result = detect_image(str(tmp_path), confidence=confidence)
+        return result
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Image detection error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+
+@app.post("/detect/video")
+async def detect_video_endpoint(
+    file: UploadFile = File(...),
+    confidence: float = Form(default=0.5),
+    max_frames: int = Form(default=0),
+):
+    """
+    Upload a video and run YOLO trash detection frame-by-frame.
+    Returns aggregated detection results and per-frame summaries.
+    """
+    suffix = Path(file.filename or "upload.mp4").suffix.lower()
+    if suffix not in {".mp4", ".avi", ".mov", ".mkv", ".wmv", ".flv"}:
+        raise HTTPException(status_code=400, detail=f"Unsupported video format: {suffix}")
+
+    tmp_path = UPLOAD_DIR / f"vid_{os.urandom(8).hex()}{suffix}"
+    output_path = UPLOAD_DIR / f"out_{os.urandom(8).hex()}.mp4"
+    try:
+        with open(tmp_path, "wb") as f:
+            content = await file.read()
+            f.write(content)
+
+        result = detect_video(
+            str(tmp_path),
+            output_path=str(output_path),
+            confidence=confidence,
+            max_frames=max_frames if max_frames > 0 else 0,
+        )
+        return result
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Video detection error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        for p in (tmp_path, output_path):
+            if p.exists():
+                p.unlink(missing_ok=True)
+
+
+@app.get("/model/status")
+def model_status():
+    """Get the current video detection model status and configuration."""
+    return get_model_status()
+
+
+@app.post("/model/reload")
+def model_reload(weights_path: Optional[str] = None):
+    """Reload the YOLO model, optionally with new weights."""
+    try:
+        return reload_model(weights_path)
+    except Exception as e:
+        logger.error(f"Model reload error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/train/start")
+async def start_training(req: TrainRequest, background_tasks: BackgroundTasks):
+    """
+    Start YOLO model training in the background.
+    """
+    def _run_training():
+        try:
+            result = train_model(
+                data_yaml=req.data_yaml,
+                epochs=req.epochs,
+                image_size=req.image_size,
+                batch_size=req.batch_size,
+                base_model=req.base_model,
+            )
+            logger.info(f"Training complete: {result}")
+        except Exception as e:
+            logger.error(f"Training failed: {e}")
+
+    background_tasks.add_task(_run_training)
+    return {
+        "status": "training_started",
+        "config": {
+            "epochs": req.epochs,
+            "image_size": req.image_size,
+            "batch_size": req.batch_size,
+            "base_model": req.base_model,
+        },
+    }
+
+
+@app.post("/train/resume")
+async def resume_training_endpoint(
+    checkpoint_path: Optional[str] = None,
+    background_tasks: BackgroundTasks = None,
+):
+    """Resume training from a checkpoint."""
+    def _run_resume():
+        try:
+            result = resume_training(checkpoint_path)
+            logger.info(f"Resume complete: {result}")
+        except Exception as e:
+            logger.error(f"Resume failed: {e}")
+
+    if background_tasks is not None:
+        background_tasks.add_task(_run_resume)
+        return {"status": "resume_started", "checkpoint": checkpoint_path}
+
+    # Synchronous fallback if no background tasks available
+    try:
+        return resume_training(checkpoint_path)
+    except Exception as e:
+        logger.error(f"Resume failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==========================================
+# AI SENTIMENT ANALYSIS ROUTES
+# ==========================================
+
+@app.post("/analyze/sentiment")
+async def analyze_sentiment_endpoint(req: SentimentRequest):
+    """
+    Analyze sentiment, urgency, and emotion of citizen report text.
+    Supports English, Hindi, and Gujarati (including transliteration).
+    """
+    try:
+        result = analyze_sentiment(req.text)
+        return {"success": True, "data": result}
+    except Exception as e:
+        logger.error(f"Sentiment analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/analyze/sentiment/batch")
+async def analyze_sentiment_batch_endpoint(req: BatchSentimentRequest):
+    """
+    Batch analyze multiple citizen reports for aggregate sentiment metrics.
+    Returns urgency distribution, dominant emotions, and trending phrases.
+    """
+    try:
+        if len(req.texts) > 100:
+            raise HTTPException(status_code=400, detail="Maximum 100 texts per batch")
+        result = analyze_batch(req.texts)
+        return {"success": True, "data": result}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Batch sentiment analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ==========================================
+# AI CITY INTELLIGENCE ROUTES
+# ==========================================
+
+@app.post("/ai/summarize")
+async def generate_city_summary(req: SummaryRequest):
+    """
+    Generate AI-powered executive summary of city conditions.
+    Includes health score, anomaly detection, trend analysis,
+    and resource allocation recommendations.
+    """
+    try:
+        summary = city_summarizer.generate_executive_summary(
+            incidents=req.incidents,
+            predictions=req.predictions,
+            recent_hours=req.period_hours,
+        )
+        return {"success": True, "data": summary}
+    except Exception as e:
+        logger.error(f"Summary generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/ai/area-briefing")
+async def generate_area_briefing(area_name: str, req: SummaryRequest):
+    """
+    Generate a focused intelligence briefing for a specific area.
+    """
+    try:
+        briefing = city_summarizer.generate_area_briefing(
+            area_name=area_name,
+            incidents=req.incidents,
+        )
+        return {"success": True, "data": briefing}
+    except Exception as e:
+        logger.error(f"Area briefing error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

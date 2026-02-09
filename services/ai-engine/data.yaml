@@ -1,0 +1,10 @@
+# YOLOv8 Dataset Configuration for Trash Detection
+# Used by the video detection module in the AI engine
+
+path: /app/data
+train: images/train
+val: images/val
+test: images/test
+
+names:
+  0: trash

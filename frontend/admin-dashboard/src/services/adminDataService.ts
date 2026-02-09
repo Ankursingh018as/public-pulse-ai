@@ -263,6 +263,19 @@ export function subscribeToUpdates(
   };
 }
 
+// Fetch video detection model status
+export async function fetchModelStatus(): Promise<any> {
+  try {
+    const res = await fetch(`${API_BASE}/video/model/status`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.data || data;
+  } catch (e) {
+    console.error('fetchModelStatus failed', e);
+    return null;
+  }
+}
+
 export default {
   fetchIncidents,
   fetchPredictions,
@@ -271,5 +284,6 @@ export default {
   updateIncidentStatus,
   fetchVerifications,
   exportAllData,
-  subscribeToUpdates
+  subscribeToUpdates,
+  fetchModelStatus
 };
