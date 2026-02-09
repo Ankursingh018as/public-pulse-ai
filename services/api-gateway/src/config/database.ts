@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import mongoose from 'mongoose';
 import { createClient } from 'redis';
 import { Pool } from 'pg';

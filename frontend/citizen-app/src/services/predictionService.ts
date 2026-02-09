@@ -5,6 +5,7 @@
 
 const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY || '';
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_AVAILABLE = !!GROQ_API_KEY;
 
 export interface Prediction {
   id: string;
@@ -183,6 +184,11 @@ export async function generateAIAlerts(
     return [];
   }
 
+  // Skip API call if no Groq key configured
+  if (!GROQ_AVAILABLE) {
+    return generateFallbackAlerts(criticalPredictions, highSeverityIncidents);
+  }
+
   const prompt = `As a smart city AI, generate 2-3 brief alert messages for Vadodara citizens based on this data:
 
 Predictions: ${JSON.stringify(criticalPredictions.slice(0, 3).map(p => ({
@@ -227,16 +233,21 @@ Respond in JSON array format:
 
     try {
       const parsed = JSON.parse(content);
+      // LLM may return objects instead of strings — coerce safely
+      const safeStr = (val: any): string =>
+        typeof val === 'object' && val !== null
+          ? (val.situation || val.action || val.message || val.urgency || JSON.stringify(val))
+          : String(val ?? '');
       return parsed.map((alert: any, idx: number) => ({
         id: `alert-${Date.now()}-${idx}`,
-        title: alert.title,
-        message: alert.message,
-        severity: alert.severity || 'warning',
+        title: safeStr(alert.title),
+        message: safeStr(alert.message),
+        severity: typeof alert.severity === 'string' ? alert.severity : 'warning',
         type: criticalPredictions[0]?.type || 'general',
         affectedArea: criticalPredictions[0]?.area_name || 'Vadodara',
         predictedTime: criticalPredictions[0]?.timeframe || '2h',
         confidence: criticalPredictions[0]?.confidence || 0.8,
-        recommendations: [alert.recommendation || 'Stay alert and plan accordingly'],
+        recommendations: [safeStr(alert.recommendation) || 'Stay alert and plan accordingly'],
         timestamp: Date.now()
       }));
     } catch {

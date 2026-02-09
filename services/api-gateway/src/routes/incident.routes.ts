@@ -107,6 +107,19 @@ incidentRouter.get('/', async (req, res) => {
 });
 
 // ===========================================
+// GET /api/v1/incidents/stats - Dashboard stats (total counts)
+// ===========================================
+incidentRouter.get('/stats', async (req, res) => {
+    try {
+        const stats = await civicIssuesService.getDashboardStats();
+        res.json({ success: true, data: stats });
+    } catch (err) {
+        console.error('Error fetching incident stats:', err);
+        res.status(500).json({ success: false, error: 'Failed to fetch stats' });
+    }
+});
+
+// ===========================================
 // POST /api/v1/incidents - Create new incident
 // ===========================================
 incidentRouter.post('/', async (req, res) => {

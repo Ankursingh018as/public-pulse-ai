@@ -1,9 +1,14 @@
 import os
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables BEFORE any src imports
+# (src modules read env vars like MODEL_DIR/UPLOAD_DIR at import time)
+load_dotenv()
+
 from fastapi import FastAPI, BackgroundTasks, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel
 from typing import Optional, List
-from dotenv import load_dotenv
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import redis
@@ -18,14 +23,12 @@ from src.ai_summarizer import CityIntelligenceSummarizer
 from src.video_detector import (
     detect_image,
     detect_video,
+    detect_frame_base64,
     get_model_status,
     reload_model,
     UPLOAD_DIR,
 )
 from src.video_training import train_model, resume_training, prepare_dataset
-
-# Load environment variables
-load_dotenv()
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -291,6 +294,25 @@ async def detect_video_endpoint(
         for p in (tmp_path, output_path):
             if p.exists():
                 p.unlink(missing_ok=True)
+
+
+@app.post("/detect/frame")
+async def detect_frame_endpoint(
+    frame: str = Form(...),
+    confidence: float = Form(default=0.5),
+):
+    """
+    Analyze a base64-encoded video frame in real-time.
+    Optimized for live video analysis - no file I/O, direct decode.
+    """
+    try:
+        result = detect_frame_base64(frame, confidence=confidence)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Frame detection error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/model/status")

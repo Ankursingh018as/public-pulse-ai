@@ -313,3 +313,33 @@ export async function incrementVerification(id: string): Promise<void> {
 
     await pgPool.query(query, [id]);
 }
+
+/**
+ * Get dashboard statistics (total counts, breakdowns)
+ */
+export async function getDashboardStats(): Promise<{
+    totalIssues: number;
+    pending: number;
+    approved: number;
+    resolved: number;
+    byType: { type: string; count: number }[];
+    recentCount: number;
+}> {
+    const [totalRes, pendingRes, approvedRes, resolvedRes, byTypeRes, recentRes] = await Promise.all([
+        pgPool.query(`SELECT COUNT(*) as count FROM civic_issues`),
+        pgPool.query(`SELECT COUNT(*) as count FROM civic_issues WHERE COALESCE(metadata->>'status', 'pending') = 'pending'`),
+        pgPool.query(`SELECT COUNT(*) as count FROM civic_issues WHERE metadata->>'status' = 'approved'`),
+        pgPool.query(`SELECT COUNT(*) as count FROM civic_issues WHERE metadata->>'status' = 'resolved'`),
+        pgPool.query(`SELECT type, COUNT(*) as count FROM civic_issues GROUP BY type ORDER BY count DESC`),
+        pgPool.query(`SELECT COUNT(*) as count FROM civic_issues WHERE created_at >= NOW() - INTERVAL '24 hours'`),
+    ]);
+
+    return {
+        totalIssues: parseInt(totalRes.rows[0]?.count || '0'),
+        pending: parseInt(pendingRes.rows[0]?.count || '0'),
+        approved: parseInt(approvedRes.rows[0]?.count || '0'),
+        resolved: parseInt(resolvedRes.rows[0]?.count || '0'),
+        byType: byTypeRes.rows.map(r => ({ type: r.type, count: parseInt(r.count) })),
+        recentCount: parseInt(recentRes.rows[0]?.count || '0'),
+    };
+}

@@ -1,21 +1,37 @@
 import os
-import pickle
 import logging
+import threading
 
 # Path to trained model - use relative path for cross-platform compatibility
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "classifier.pkl")
 
-# Load model if exists
-model = None
-try:
-    if os.path.exists(MODEL_PATH):
-        with open(MODEL_PATH, 'rb') as f:
-            model = pickle.load(f)
-        logging.warning("Loaded fine-tuned classifier model from: " + MODEL_PATH)
-    else:
-        logging.warning("No trained model found at: " + MODEL_PATH + ". Using rule-based fallback.")
-except Exception as e:
-    logging.error(f"Failed to load model: {e}")
+# Lazy-loaded ML model (sklearn import can be very slow on Python 3.13)
+_model = None
+_model_loaded = False
+_model_lock = threading.Lock()
+
+
+def _get_model():
+    """Lazy-load the sklearn model on first use, not at import time."""
+    global _model, _model_loaded
+    if _model_loaded:
+        return _model
+    with _model_lock:
+        if _model_loaded:
+            return _model
+        try:
+            if os.path.exists(MODEL_PATH):
+                import pickle
+                with open(MODEL_PATH, 'rb') as f:
+                    _model = pickle.load(f)
+                logging.info("Loaded classifier model from: " + MODEL_PATH)
+            else:
+                logging.warning("No trained model at: " + MODEL_PATH + ". Using rule-based fallback.")
+        except Exception as e:
+            logging.error(f"Failed to load classifier model: {e}")
+        _model_loaded = True
+        return _model
+
 
 # Rule-based fallback
 KEYWORDS = {
@@ -32,18 +48,14 @@ def classify_issue(text: str) -> tuple[str, float]:
     Returns (type, confidence)
     """
     # 1. Try ML Model
+    model = _get_model()
     if model:
         try:
-            # Predict
             probas = model.predict_proba([text])[0]
             classes = model.classes_
-            
-            # Get max probability
             max_idx = probas.argmax()
             predicted_class = classes[max_idx]
             confidence = probas[max_idx]
-            
-            # Use scalar float for confidence to avoid serialization issues
             return predicted_class, float(confidence)
         except Exception as e:
             logging.error(f"Prediction error: {e}")

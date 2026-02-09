@@ -15,7 +15,7 @@ import adminDataService from '../services/adminDataService';
 
 export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('Live Monitor');
-    const [stats, setStats] = useState({ issues: 0, predictions: 0 });
+    const [stats, setStats] = useState({ issues: 0, predictions: 0, pending: 0, approved: 0, resolved: 0, recent24h: 0 });
     const [predictions, setPredictions] = useState<any[]>([]);
     const [incidents, setIncidents] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -49,13 +49,14 @@ export default function Dashboard() {
                 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
                 
                 // Fetch both, but handle each independently
-                const [predRes, incRes] = await Promise.all([
+                const [predRes, incRes, statsRes] = await Promise.all([
                     fetch(`${API_URL}/predictions`).catch(() => null),
-                    fetch(`${API_URL}/incidents?limit=100`).catch(() => null)
+                    fetch(`${API_URL}/incidents?limit=50`).catch(() => null),
+                    fetch(`${API_URL}/incidents/stats`).catch(() => null)
                 ]);
 
-                let predictions = [];
-                let incidents = [];
+                let predictions: any[] = [];
+                let incidents: any[] = [];
 
                 // Handle predictions response
                 if (predRes && predRes.ok) {
@@ -71,9 +72,20 @@ export default function Dashboard() {
                     setIncidents(incidents);
                 }
 
+                // Handle real stats from count endpoint
+                let dbStats = { totalIssues: incidents.length, pending: 0, approved: 0, resolved: 0, recentCount: 0 };
+                if (statsRes && statsRes.ok) {
+                    const statsData = await statsRes.json();
+                    if (statsData.data) dbStats = statsData.data;
+                }
+
                 setStats({
                     predictions: predictions.length,
-                    issues: incidents.length
+                    issues: dbStats.totalIssues,
+                    pending: dbStats.pending,
+                    approved: dbStats.approved,
+                    resolved: dbStats.resolved,
+                    recent24h: dbStats.recentCount,
                 });
 
             } catch (err) {
@@ -111,9 +123,9 @@ export default function Dashboard() {
 
             <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} isConnected={isConnected} />
 
-            <main className="flex-1 lg:ml-72 p-4 md:p-6 lg:p-8 overflow-y-auto h-screen relative pt-16 lg:pt-8">
+            <main className="flex-1 lg:ml-72 p-4 md:p-6 lg:p-8 overflow-y-auto h-screen relative pt-20 lg:pt-8">
                 {/* Top Bar */}
-                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10">
+                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 md:mb-10 pl-12 lg:pl-0">
                     <div>
                         <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-white tracking-tight">Vadodara Center</h2>
                         <p className="text-slate-400 text-xs md:text-sm mt-1">Real-time Semantic Urban Analysis</p>
@@ -142,10 +154,10 @@ export default function Dashboard() {
                     <div className="space-y-6 md:space-y-8 animate-fade-in">
                         {/* Stats Row */}
                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
-                            <StatCard label="Active Issues" value={stats.issues.toString()} trend="12%" trendUp={false} icon={AlertTriangle} color="red" />
-                            <StatCard label="Predictions" value={stats.predictions.toString()} trend="5%" trendUp={true} icon={Zap} color="purple" />
-                            <StatCard label="Avg Response" value="12m" trend="2m" trendUp={true} icon={Activity} color="blue" />
-                            <StatCard label="City Health" value="94%" trend="Stable" trendUp={true} icon={Activity} color="green" />
+                            <StatCard label="Total Issues" value={stats.issues.toString()} trend={`${stats.recent24h} today`} trendUp={false} icon={AlertTriangle} color="red" />
+                            <StatCard label="Pending" value={stats.pending.toString()} trend={`${stats.approved} approved`} trendUp={true} icon={Zap} color="purple" />
+                            <StatCard label="Resolved" value={stats.resolved.toString()} trend={`${stats.predictions} predictions`} trendUp={true} icon={Activity} color="blue" />
+                            <StatCard label="Predictions" value={stats.predictions.toString()} trend="AI-powered" trendUp={true} icon={Activity} color="green" />
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">

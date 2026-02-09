@@ -31,8 +31,21 @@ app.use(cors({
 }));
 
 app.use(morgan('dev'));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Skip body-parsing for multipart routes (multer handles those)
+const skipMultipart = (req: any, res: any, next: any) => {
+    const ct = req.headers['content-type'] || '';
+    if (ct.includes('multipart/form-data')) return next();
+    return undefined; // let the parser handle it
+};
+app.use((req, res, next) => {
+    if ((req.headers['content-type'] || '').includes('multipart/form-data')) return next();
+    express.json({ limit: '50mb' })(req, res, next);
+});
+app.use((req, res, next) => {
+    if ((req.headers['content-type'] || '').includes('multipart/form-data')) return next();
+    express.urlencoded({ extended: true, limit: '50mb' })(req, res, next);
+});
 
 // ===========================================
 // ROUTES

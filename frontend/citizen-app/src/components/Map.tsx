@@ -19,10 +19,24 @@ interface Prediction {
   confidence: number;
 }
 
+interface CameraFeed {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  area: string;
+  type: string;
+  videoUrl: string;
+  status: string;
+  totalDetections: number;
+  lastDetectionAt: string | null;
+}
+
 interface MapProps {
   selectedFilter: string | null;
   onMarkerClick?: (incident: any) => void;
   onIncidentsChange?: (incidents: any[]) => void;
+  onCameraClick?: (camera: CameraFeed) => void;
 }
 
 // Vadodara bounds and center
@@ -62,11 +76,12 @@ function LocationMarker({ position }: { position: [number, number] | null }) {
   return null;
 }
 
-export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange }: MapProps) {
+export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange, onCameraClick }: MapProps) {
   const { user } = useUser();
   const [incidents, setIncidents] = useState<any[]>([]);
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [aiPredictions, setAIPredictions] = useState<any[]>([]);
+  const [cameras, setCameras] = useState<CameraFeed[]>([]);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [reportPosition, setReportPosition] = useState<{ lat: number; lng: number } | null>(null);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -211,6 +226,27 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange }
 
     fetchAIPreds();
     const interval = setInterval(fetchAIPreds, 120000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch camera feed locations
+  useEffect(() => {
+    const fetchCameras = async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+        const res = await fetch(`${API_URL}/video/cameras`);
+        if (res.ok) {
+          const data = await res.json();
+          if (mountedRef.current && data.data) {
+            setCameras(data.data);
+          }
+        }
+      } catch {
+        // Silent fail
+      }
+    };
+    fetchCameras();
+    const interval = setInterval(fetchCameras, 60000); // Refresh every minute
     return () => clearInterval(interval);
   }, []);
 
@@ -375,6 +411,63 @@ export default function Map({ selectedFilter, onMarkerClick, onIncidentsChange }
             </Popup>
           </CircleMarker>
         )}
+
+        {/* Camera Feed Markers - 📹 icons */}
+        {cameras.map((cam) => (
+          <CircleMarker
+            key={cam.id}
+            center={[cam.lat, cam.lng]}
+            radius={12}
+            pathOptions={{
+              color: '#a855f7',
+              fillColor: '#7c3aed',
+              fillOpacity: 0.85,
+              weight: 3,
+              className: 'camera-marker'
+            }}
+            eventHandlers={{
+              click: (e) => {
+                e.originalEvent?.stopPropagation();
+                onCameraClick?.(cam);
+              }
+            }}
+          >
+            <Popup className="dark-popup">
+              <div className="text-sm bg-[#1a1a1a] text-white p-3 rounded-lg min-w-[160px] -m-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">📹</span>
+                  <strong className="text-purple-400">{cam.name}</strong>
+                </div>
+                <div className="text-slate-400 text-xs space-y-1">
+                  <div className="flex justify-between">
+                    <span>Area</span>
+                    <span className="text-white">{cam.area}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Monitor</span>
+                    <span className="capitalize text-white">{cam.type}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Detections</span>
+                    <span className="text-orange-400 font-bold">{cam.totalDetections}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Status</span>
+                    <span className={`font-bold ${cam.status === 'active' ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {cam.status === 'active' ? '● Online' : '○ Offline'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => onCameraClick?.(cam)}
+                  className="mt-3 w-full px-3 py-1.5 bg-purple-500/20 text-purple-400 text-xs rounded-lg hover:bg-purple-500/30 border border-purple-500/30 font-medium"
+                >
+                  🔍 Analyze Video
+                </button>
+              </div>
+            </Popup>
+          </CircleMarker>
+        ))}
       </MapContainer>
 
       {/* Map Click Report Modal */}

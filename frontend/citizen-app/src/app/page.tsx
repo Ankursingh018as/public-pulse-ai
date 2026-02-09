@@ -8,6 +8,7 @@ import AINarrationPanel from '../components/AINarrationPanel';
 import AIPredictionPanel from '../components/AIPredictionPanel';
 import ReportIssueModal from '../components/ReportIssueModal';
 import VideoReportModal from '../components/VideoReportModal';
+import LiveVideoAnalysis from '../components/LiveVideoAnalysis';
 import AIChatAssistant from '../components/AIChatAssistant';
 import dataService from '../services/dataService';
 import { useWebSocket } from '../hooks/useWebSocket';
@@ -36,6 +37,8 @@ export default function Home() {
   const [locationError, setLocationError] = useState<string | null>(null);
   const [quickReportOpen, setQuickReportOpen] = useState(false);
   const [videoReportOpen, setVideoReportOpen] = useState(false);
+  const [liveAnalysisOpen, setLiveAnalysisOpen] = useState(false);
+  const [selectedCamera, setSelectedCamera] = useState<any>(null);
   const [reportSubmitted, setReportSubmitted] = useState(false);
   const [verifyingPrediction, setVerifyingPrediction] = useState<any>(null);
   const [syncStatus, setSyncStatus] = useState({ isOnline: true, pendingCount: 0, lastSync: 0 });
@@ -256,6 +259,10 @@ export default function Home() {
           selectedFilter={selectedIssue}
           onMarkerClick={setVerifyingPrediction}
           onIncidentsChange={setActiveIncidents}
+          onCameraClick={(cam: any) => {
+            setSelectedCamera(cam);
+            setLiveAnalysisOpen(true);
+          }}
         />
 
         {/* AI Narration Panel - Top Right (hidden on very small screens) */}
@@ -410,6 +417,16 @@ export default function Home() {
         open={videoReportOpen}
         onClose={() => setVideoReportOpen(false)}
         position={userLocation}
+      />
+
+      {/* Live Video Analysis Modal (camera feed) */}
+      <LiveVideoAnalysis
+        open={liveAnalysisOpen}
+        onClose={() => {
+          setLiveAnalysisOpen(false);
+          setSelectedCamera(null);
+        }}
+        camera={selectedCamera}
       />
 
       {/* Verification Modal */}

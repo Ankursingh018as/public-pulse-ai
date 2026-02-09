@@ -32,6 +32,11 @@ export async function generateNarration(incident: Incident, context?: {
   nearbyIncidents?: number;
   recentTrend?: string;
 }): Promise<string> {
+  // Skip API call if no key configured
+  if (!GROQ_API_KEY) {
+    return getFallbackNarration(incident);
+  }
+
   const severityLabel = incident.severity >= 0.7 ? 'high' : incident.severity >= 0.4 ? 'moderate' : 'low';
   const verificationStatus = incident.verified > 0 
     ? `Verified by ${incident.verified} citizen${incident.verified > 1 ? 's' : ''}`

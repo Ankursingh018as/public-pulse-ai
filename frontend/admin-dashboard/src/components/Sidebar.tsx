@@ -68,7 +68,7 @@ export default function Sidebar({ activeTab, setActiveTab, isConnected }: Sideba
                     <button
                         key={item.id}
                         onClick={() => handleTabChange(item.id)}
-                        className={`flex items-center gap-3 w-full p-3 lg:p-3.5 rounded-xl transition-all duration-300 group
+                        className={`relative flex items-center gap-3 w-full p-3 lg:p-3.5 rounded-xl transition-all duration-300 group
                         ${activeTab === item.id
                                 ? 'bg-gradient-to-r from-blue-600/20 to-cyan-600/20 border border-blue-500/30 text-white shadow-lg shadow-blue-900/20'
                                 : 'text-slate-400 hover:bg-white/5 hover:text-white border border-transparent'
@@ -79,7 +79,7 @@ export default function Sidebar({ activeTab, setActiveTab, isConnected }: Sideba
                         </span>
                         <span className="font-medium text-sm">{item.label}</span>
                         {activeTab === item.id && (
-                            <span className="ml-auto w-1 h-8 bg-cyan-400 rounded-full blur-[2px] opacity-50 absolute left-0"></span>
+                            <span className="w-1 h-8 bg-cyan-400 rounded-full blur-[2px] opacity-50 absolute left-0 top-1/2 -translate-y-1/2"></span>
                         )}
                     </button>
                 ))}
@@ -103,7 +103,7 @@ export default function Sidebar({ activeTab, setActiveTab, isConnected }: Sideba
             {/* Mobile hamburger button */}
             <button
                 onClick={() => setMobileOpen(true)}
-                className="lg:hidden fixed top-4 left-4 z-[60] p-2.5 bg-slate-800/90 backdrop-blur-md rounded-xl border border-white/10 text-white shadow-lg"
+                className="lg:hidden fixed top-5 left-4 z-[60] p-2 bg-slate-800/90 backdrop-blur-md rounded-xl border border-white/10 text-white shadow-lg"
             >
                 <Menu className="w-5 h-5" />
             </button>
