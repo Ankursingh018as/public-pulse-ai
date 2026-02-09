@@ -260,6 +260,8 @@ analyticsRouter.get('/performance', async (req, res) => {
                 avg_resolution_minutes: Math.round(avgResolutionTime[0]?.avg || 0),
                 citizen_reports_7d: citizenReports,
                 verified_incidents_7d: verifiedIncidents,
+                // Placeholder values - in production, these would come from
+                // a model evaluation pipeline and infrastructure monitoring service
                 ai_accuracy: 87,
                 system_uptime: 99.2,
                 timestamp: now

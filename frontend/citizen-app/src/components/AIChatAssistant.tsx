@@ -90,7 +90,7 @@ function detectIntent(text: string): { intent: string; area?: string } {
     return { intent: 'help' };
 }
 
-// ~2km proximity threshold (in degrees latitude/longitude, approximate at Vadodara's latitude)
+// Proximity threshold: ~2.2km latitude, ~2km longitude at Vadodara's latitude (~22°N)
 const NEARBY_THRESHOLD_DEGREES = 0.02;
 
 export default function AIChatAssistant({ incidents, userLocation }: AIChatAssistantProps) {

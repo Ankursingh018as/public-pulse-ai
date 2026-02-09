@@ -384,7 +384,11 @@ class CityIntelligenceSummarizer:
             return datetime.fromtimestamp(ts)
         if isinstance(ts, str):
             try:
-                return datetime.fromisoformat(ts.replace('Z', '+00:00').replace('+00:00', ''))
+                # Normalize timezone: replace Z with +00:00 for ISO parsing,
+                # then strip timezone info for naive datetime comparison
+                normalized = ts.replace('Z', '+00:00')
+                parsed = datetime.fromisoformat(normalized)
+                return parsed.replace(tzinfo=None)
             except (ValueError, TypeError):
                 pass
         return datetime.now() - timedelta(hours=1)  # Default to 1 hour ago

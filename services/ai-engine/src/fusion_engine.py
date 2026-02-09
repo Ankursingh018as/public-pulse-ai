@@ -29,9 +29,11 @@ class FusionEngine:
         weather_score = inputs.get("weather_score", 0.0)
         temporal_score = inputs.get("temporal_score", 0.0)
 
-        # If weather/temporal not provided, redistribute their weight
+        # If weather/temporal not provided, estimate from correlated signals.
+        # Time-series and anomaly scores correlate with weather impact (e.g., flooding
+        # spikes both time-series predictions and anomaly detection during rain events).
         if weather_score == 0.0 and "weather_score" not in inputs:
-            weather_score = (ts_score + anomaly_score) / 2  # Estimate from related signals
+            weather_score = (ts_score + anomaly_score) / 2
         if temporal_score == 0.0 and "temporal_score" not in inputs:
             temporal_score = self._get_temporal_factor()
 
