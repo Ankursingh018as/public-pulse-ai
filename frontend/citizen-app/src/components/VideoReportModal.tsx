@@ -3,6 +3,22 @@
 import { useState, useRef } from 'react';
 import { Camera, X, Loader2, CheckCircle, AlertTriangle, Upload, Trash2 } from 'lucide-react';
 
+interface Detection {
+    class: string;
+    confidence: number;
+    bbox: number[];
+}
+
+interface DetectionResult {
+    status: string;
+    trash_count: number;
+    total_detections: number;
+    inference_time_ms: number;
+    detections: Detection[];
+    incident_id?: string;
+    confidence_threshold: number;
+}
+
 interface VideoReportModalProps {
     open: boolean;
     onClose: () => void;
@@ -15,7 +31,7 @@ export default function VideoReportModal({ open, onClose, position }: VideoRepor
     const [file, setFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<DetectionResult | null>(null);
     const [error, setError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -71,9 +87,10 @@ export default function VideoReportModal({ open, onClose, position }: VideoRepor
 
             const data = await res.json();
             setResult(data.data || data);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Image detection failed:', err);
-            setError(err.message || 'Detection failed. The AI service may be unavailable.');
+            const message = err instanceof Error ? err.message : 'Detection failed. The AI service may be unavailable.';
+            setError(message);
         } finally {
             setSubmitting(false);
         }
@@ -143,7 +160,7 @@ export default function VideoReportModal({ open, onClose, position }: VideoRepor
                         {result.detections && result.detections.length > 0 && (
                             <div className="space-y-2">
                                 <p className="text-xs font-semibold text-slate-400 uppercase">Detections</p>
-                                {result.detections.slice(0, 10).map((det: any, i: number) => (
+                                {result.detections.slice(0, 10).map((det, i) => (
                                     <div key={i} className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
                                         <span className="text-sm text-white capitalize">{det.class}</span>
                                         <span className="text-xs text-cyan-400 font-mono">{Math.round(det.confidence * 100)}%</span>
